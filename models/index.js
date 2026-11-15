@@ -53,6 +53,7 @@ export const City = model("City", {
   latitude: Number,
   longitude: Number,
   geographicBounds: [Number],
+  catalogReady: { type: Boolean, default: true },
   description: String,
   heroImage: image,
   thumbnailImage: image,
@@ -116,6 +117,7 @@ export const Category = model("Category", {
   },
 });
 const activity = {
+  kind: { type: String, enum: ['place', 'hotel'], default: 'place' },
   cityId: ref("City", true),
   title: { type: String, required: true },
   qualityScore: { type: Number, default: 0, index: true },

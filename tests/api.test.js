@@ -19,6 +19,19 @@ import {
 import { runSyncJob, queuePublishedCitySyncs } from "../services/sync.js";
 import { normalizeOSM, providers } from "../services/providers.js";
 process.env.NODE_ENV = "test";
+test('hotel discovery keeps room rates separate from admission and day plans', async () => {
+  const normalized=normalizeOSM({type:'node',id:980001,lat:city.latitude,lon:city.longitude,tags:{name:'Test lodging',tourism:'hotel',fee:'no'}},city,{});
+  assert.equal(normalized.kind,'hotel'); assert.equal(normalized.priceInformation.known,false);
+  assert.ok(normalized.tags.includes('hotels'));
+  const hotel=await Activity.create(normalized);
+  const list=await request(app).get(`/api/v1/hotels?cityId=${city._id}`);
+  assert.equal(list.status,200); assert.ok(list.body.data.some(a=>a._id===String(hotel._id)));
+  const places=await request(app).get(`/api/v1/activities?cityId=${city._id}&kind=place`);
+  assert.ok(!places.body.data.some(a=>a._id===String(hotel._id)));
+  const {eligible}=await import('../services/planner.js');
+  assert.equal(eligible(normalized,{}),false);
+  await Activity.deleteOne({_id:hotel._id});
+});
 process.env.ADMIN_PASSWORD = "test-only-password-never-production";
 let mongo, app, city, category, free, agent, csrf;
 before(async () => {

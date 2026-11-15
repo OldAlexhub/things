@@ -61,7 +61,7 @@ publicRouter.get("/health", (_req, res) =>
 publicRouter.get("/cities", async (_req, res) =>
   send(
     res,
-    await City.find({ publicationStatus: "published" })
+    await City.find({ publicationStatus: "published", catalogReady: {$ne:false} })
       .sort({ name: 1 })
       .limit(200)
       .lean()
@@ -82,6 +82,7 @@ const listQuery = z.object({
   cityId: id,
   q: z.string().max(160).optional(),
   category: id.optional(),
+  kind: z.enum(['place','hotel']).optional(),
   tags: z.string().max(100).optional(),
   page: z.coerce.number().int().min(1).max(1000).default(1),
   limit: z.coerce.number().int().min(1).max(40).default(20),
@@ -105,6 +106,7 @@ export function activityFilter(p) {
   if (p.q) q.$text = { $search: p.q };
   if (p.category) q.categories = p.category;
   if (p.tags) q.tags = p.tags;
+  if (p.kind) q.kind = p.kind === 'hotel' ? 'hotel' : {$ne:'hotel'};
   if (p.budget !== undefined) {
     q["priceInformation.known"] = true;
     q["priceInformation.adult"] = { $lte: p.budget };
@@ -144,12 +146,14 @@ export function activityFilter(p) {
 }
 for (const [path, Model] of [
   ["activities", Activity],
+  ["hotels", Activity],
   ["events", Event],
 ]) {
   publicRouter.get(`/${path}`, async (req, res) => {
     const p = listQuery.parse(req.query);
     const city = await cityOr404(p.cityId);
     const q = activityFilter(p);
+    if (path === 'hotels') q.kind = 'hotel';
     if (path === "events") {
       q.eventStatus = upcoming().eventStatus;
       q.$and = [...(q.$and || []), ...upcoming().$and];
@@ -329,6 +333,7 @@ publicRouter.get("/cities/:cityId/home", async (req, res) => {
             cityId: city._id,
             ...visible(),
             ...(s.tags?.length ? { tags: { $in: s.tags } } : {}),
+            ...(!s.tags?.includes('hotels') ? {kind:{$ne:'hotel'}} : {}),
           })
             .sort({ qualityScore: -1, updatedAt: -1 })
             .limit(8)
@@ -343,6 +348,7 @@ async function candidates(input) {
   input.start ??= [city.longitude, city.latitude];
   const query = {
     cityId: city._id,
+    kind: {$ne:'hotel'},
     ...visible(),
     coordinates: {
       $geoWithin: { $centerSphere: [input.start, input.radiusKm / 6371] },

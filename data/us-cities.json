@@ -1,0 +1,802 @@
+[
+  {
+    "name": "Huntsville",
+    "state": "Alabama",
+    "slug": "huntsville-alabama",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 34.729847,
+    "longitude": -86.5859011,
+    "geographicBounds": [
+      34.5334323,
+      -86.9567811,
+      34.8651648,
+      -86.3993424
+    ],
+    "population2025": 233627
+  },
+  {
+    "name": "Anchorage",
+    "state": "Alaska",
+    "slug": "anchorage-alaska",
+    "country": "USA",
+    "timezone": "America/Anchorage",
+    "latitude": 61.2163129,
+    "longitude": -149.894852,
+    "geographicBounds": [
+      60.733007,
+      -150.420615,
+      61.483938,
+      -148.462396
+    ],
+    "population2025": 287155
+  },
+  {
+    "name": "Phoenix",
+    "state": "Arizona",
+    "slug": "phoenix-arizona",
+    "country": "USA",
+    "timezone": "America/Phoenix",
+    "latitude": 33.4484367,
+    "longitude": -112.074141,
+    "geographicBounds": [
+      33.2904827,
+      -112.3240289,
+      33.9183794,
+      -111.9255304
+    ],
+    "population2025": 1665481
+  },
+  {
+    "name": "Little Rock",
+    "state": "Arkansas",
+    "slug": "little-rock-arkansas",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 34.7465071,
+    "longitude": -92.2896267,
+    "geographicBounds": [
+      34.6256657,
+      -92.5215905,
+      34.8218226,
+      -92.1506554
+    ],
+    "population2025": 206427
+  },
+  {
+    "name": "Los Angeles",
+    "state": "California",
+    "slug": "los-angeles-california",
+    "country": "USA",
+    "timezone": "America/Los_Angeles",
+    "latitude": 34.0536923,
+    "longitude": -118.2427676,
+    "geographicBounds": [
+      33.659541,
+      -118.6681798,
+      34.337306,
+      -118.1552983
+    ],
+    "population2025": 3869089
+  },
+  {
+    "name": "Denver",
+    "state": "Colorado",
+    "slug": "denver-colorado",
+    "country": "USA",
+    "timezone": "America/Denver",
+    "latitude": 39.7392364,
+    "longitude": -104.984862,
+    "geographicBounds": [
+      39.6143008,
+      -105.1098845,
+      39.9142087,
+      -104.5996997
+    ],
+    "population2025": 740613
+  },
+  {
+    "name": "Bridgeport",
+    "state": "Connecticut",
+    "slug": "bridgeport-connecticut",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 41.1792695,
+    "longitude": -73.1887863,
+    "geographicBounds": [
+      41.1399013,
+      -73.2440717,
+      41.2296213,
+      -73.1537198
+    ],
+    "population2025": 152273
+  },
+  {
+    "name": "Wilmington",
+    "state": "Delaware",
+    "slug": "wilmington-delaware",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 39.738331,
+    "longitude": -75.5527467,
+    "geographicBounds": [
+      39.6880352,
+      -75.588459,
+      39.7730389,
+      -75.4707753
+    ],
+    "population2025": 73512
+  },
+  {
+    "name": "Jacksonville",
+    "state": "Florida",
+    "slug": "jacksonville-florida",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 30.3262247,
+    "longitude": -81.6579179,
+    "geographicBounds": [
+      30.103748,
+      -82.0493895,
+      30.5862095,
+      -81.316712
+    ],
+    "population2025": 1017689
+  },
+  {
+    "name": "Atlanta",
+    "state": "Georgia",
+    "slug": "atlanta-georgia",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 33.7544657,
+    "longitude": -84.3898151,
+    "geographicBounds": [
+      33.6479187,
+      -84.550854,
+      33.886823,
+      -84.28956
+    ],
+    "population2025": 529110
+  },
+  {
+    "name": "Honolulu",
+    "state": "Hawaii",
+    "slug": "honolulu-hawaii",
+    "country": "USA",
+    "timezone": "Pacific/Honolulu",
+    "latitude": 21.304547,
+    "longitude": -157.855676,
+    "geographicBounds": [
+      21.2548159,
+      -157.9503569,
+      21.4021936,
+      -157.6486277
+    ],
+    "population2025": 341868
+  },
+  {
+    "name": "Boise",
+    "state": "Idaho",
+    "slug": "boise-idaho",
+    "country": "USA",
+    "timezone": "America/Boise",
+    "latitude": 43.6166163,
+    "longitude": -116.200886,
+    "geographicBounds": [
+      43.5021759,
+      -116.3656818,
+      43.6920633,
+      -116.09419
+    ],
+    "population2025": 238429
+  },
+  {
+    "name": "Chicago",
+    "state": "Illinois",
+    "slug": "chicago-illinois",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 41.8755616,
+    "longitude": -87.6244212,
+    "geographicBounds": [
+      41.644531,
+      -87.9400876,
+      42.0230529,
+      -87.5241243
+    ],
+    "population2025": 2731585
+  },
+  {
+    "name": "Indianapolis",
+    "state": "Indiana",
+    "slug": "indianapolis-indiana",
+    "country": "USA",
+    "timezone": "America/Indiana/Indianapolis",
+    "latitude": 39.7683331,
+    "longitude": -86.1583502,
+    "geographicBounds": [
+      39.6321626,
+      -86.3281207,
+      39.9275253,
+      -85.9380401
+    ],
+    "population2025": 901116
+  },
+  {
+    "name": "Des Moines",
+    "state": "Iowa",
+    "slug": "des-moines-iowa",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 41.5868654,
+    "longitude": -93.6249494,
+    "geographicBounds": [
+      41.4796389,
+      -93.7091411,
+      41.6589106,
+      -93.4936911
+    ],
+    "population2025": 212086
+  },
+  {
+    "name": "Wichita",
+    "state": "Kansas",
+    "slug": "wichita-kansas",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 37.6922361,
+    "longitude": -97.3375448,
+    "geographicBounds": [
+      37.489018,
+      -97.734352,
+      37.8402,
+      -97.153003
+    ],
+    "population2025": 400987
+  },
+  {
+    "name": "Louisville",
+    "state": "Kentucky",
+    "slug": "louisville-kentucky",
+    "country": "USA",
+    "timezone": "America/Kentucky/Louisville",
+    "latitude": 38.2542376,
+    "longitude": -85.759407,
+    "geographicBounds": [
+      37.9971,
+      -85.9470644,
+      38.3801391,
+      -85.4051
+    ],
+    "population2025": 641962
+  },
+  {
+    "name": "New Orleans",
+    "state": "Louisiana",
+    "slug": "new-orleans-louisiana",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 29.9574657,
+    "longitude": -90.0629493,
+    "geographicBounds": [
+      29.8654809,
+      -90.1399307,
+      30.1994687,
+      -89.6251763
+    ],
+    "population2025": 362154
+  },
+  {
+    "name": "Portland",
+    "state": "Maine",
+    "slug": "portland-maine",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 43.6573605,
+    "longitude": -70.2586618,
+    "geographicBounds": [
+      43.5443477,
+      -70.3473997,
+      43.7276965,
+      -69.9758509
+    ],
+    "population2025": 69911
+  },
+  {
+    "name": "Baltimore",
+    "state": "Maryland",
+    "slug": "baltimore-maryland",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 39.2908816,
+    "longitude": -76.610759,
+    "geographicBounds": [
+      39.1972328,
+      -76.7112977,
+      39.3719992,
+      -76.5296757
+    ],
+    "population2025": 569997
+  },
+  {
+    "name": "Boston",
+    "state": "Massachusetts",
+    "slug": "boston-massachusetts",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 42.3588336,
+    "longitude": -71.0578303,
+    "geographicBounds": [
+      42.2279149,
+      -71.1912442,
+      42.3969775,
+      -70.8044881
+    ],
+    "population2025": 672973
+  },
+  {
+    "name": "Detroit",
+    "state": "Michigan",
+    "slug": "detroit-michigan",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 42.3315509,
+    "longitude": -83.0466403,
+    "geographicBounds": [
+      42.255192,
+      -83.287959,
+      42.4503959,
+      -82.9104391
+    ],
+    "population2025": 649095
+  },
+  {
+    "name": "Minneapolis",
+    "state": "Minnesota",
+    "slug": "minneapolis-minnesota",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 44.9772995,
+    "longitude": -93.2654692,
+    "geographicBounds": [
+      44.8906175,
+      -93.329125,
+      45.0512576,
+      -93.193859
+    ],
+    "population2025": 430324
+  },
+  {
+    "name": "Jackson",
+    "state": "Mississippi",
+    "slug": "jackson-mississippi",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 32.2998686,
+    "longitude": -90.1830408,
+    "geographicBounds": [
+      32.1955013,
+      -90.3299278,
+      32.4124415,
+      -90.0636172
+    ],
+    "population2025": 141196
+  },
+  {
+    "name": "Kansas City",
+    "state": "Missouri",
+    "slug": "kansas-city-missouri",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 39.100105,
+    "longitude": -94.5781416,
+    "geographicBounds": [
+      38.827176,
+      -94.765917,
+      39.356662,
+      -94.385522
+    ],
+    "population2025": 521220
+  },
+  {
+    "name": "Billings",
+    "state": "Montana",
+    "slug": "billings-montana",
+    "country": "USA",
+    "timezone": "America/Denver",
+    "latitude": 45.7874957,
+    "longitude": -108.49607,
+    "geographicBounds": [
+      45.710673,
+      -108.7092571,
+      45.852653,
+      -108.435916
+    ],
+    "population2025": 121239
+  },
+  {
+    "name": "Omaha",
+    "state": "Nebraska",
+    "slug": "omaha-nebraska",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 41.2587459,
+    "longitude": -95.9383758,
+    "geographicBounds": [
+      41.190585,
+      -96.2682,
+      41.3930618,
+      -95.871141
+    ],
+    "population2025": 488797
+  },
+  {
+    "name": "Las Vegas",
+    "state": "Nevada",
+    "slug": "las-vegas-nevada",
+    "country": "USA",
+    "timezone": "America/Los_Angeles",
+    "latitude": 36.1674263,
+    "longitude": -115.1484131,
+    "geographicBounds": [
+      36.129554,
+      -115.406575,
+      36.401481,
+      -115.062066
+    ],
+    "population2025": 679817
+  },
+  {
+    "name": "Manchester",
+    "state": "New Hampshire",
+    "slug": "manchester-new-hampshire",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 42.9956397,
+    "longitude": -71.4547891,
+    "geographicBounds": [
+      42.890351,
+      -71.5127468,
+      43.0517714,
+      -71.3754311
+    ],
+    "population2025": 116818
+  },
+  {
+    "name": "Newark",
+    "state": "New Jersey",
+    "slug": "newark-new-jersey",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 40.735657,
+    "longitude": -74.1723667,
+    "geographicBounds": [
+      40.6746818,
+      -74.2513334,
+      40.7881387,
+      -74.1141786
+    ],
+    "population2025": 323808
+  },
+  {
+    "name": "Albuquerque",
+    "state": "New Mexico",
+    "slug": "albuquerque-new-mexico",
+    "country": "USA",
+    "timezone": "America/Denver",
+    "latitude": 35.0841034,
+    "longitude": -106.650985,
+    "geographicBounds": [
+      34.9470871,
+      -106.8821501,
+      35.218203,
+      -106.4714237
+    ],
+    "population2025": 556588
+  },
+  {
+    "name": "New York",
+    "state": "New York",
+    "slug": "new-york-new-york",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 40.7127281,
+    "longitude": -74.0060152,
+    "geographicBounds": [
+      40.476578,
+      -74.258843,
+      40.91763,
+      -73.700233
+    ],
+    "population2025": 8584629
+  },
+  {
+    "name": "Charlotte",
+    "state": "North Carolina",
+    "slug": "charlotte-north-carolina",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 35.2272086,
+    "longitude": -80.8430827,
+    "geographicBounds": [
+      35.0105195,
+      -81.0116951,
+      35.4002508,
+      -80.6348755
+    ],
+    "population2025": 964784
+  },
+  {
+    "name": "Fargo",
+    "state": "North Dakota",
+    "slug": "fargo-north-dakota",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 46.877229,
+    "longitude": -96.789821,
+    "geographicBounds": [
+      46.7028453,
+      -96.903771,
+      46.9769494,
+      -96.7528369
+    ],
+    "population2025": 136275
+  },
+  {
+    "name": "Columbus",
+    "state": "Ohio",
+    "slug": "columbus-ohio",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 39.9622601,
+    "longitude": -83.0007065,
+    "geographicBounds": [
+      39.8086936,
+      -83.2101797,
+      40.1573082,
+      -82.7713119
+    ],
+    "population2025": 938396
+  },
+  {
+    "name": "Oklahoma City",
+    "state": "Oklahoma",
+    "slug": "oklahoma-city-oklahoma",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 35.4729886,
+    "longitude": -97.5170536,
+    "geographicBounds": [
+      35.290695,
+      -97.830948,
+      35.6748662,
+      -97.124718
+    ],
+    "population2025": 719849
+  },
+  {
+    "name": "Portland",
+    "state": "Oregon",
+    "slug": "portland-oregon",
+    "country": "USA",
+    "timezone": "America/Los_Angeles",
+    "latitude": 45.5202471,
+    "longitude": -122.674194,
+    "geographicBounds": [
+      45.432536,
+      -122.8367489,
+      45.6528812,
+      -122.4720252
+    ],
+    "population2025": 635109
+  },
+  {
+    "name": "Philadelphia",
+    "state": "Pennsylvania",
+    "slug": "philadelphia-pennsylvania",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 39.9527237,
+    "longitude": -75.1635262,
+    "geographicBounds": [
+      39.867005,
+      -75.280266,
+      40.1379593,
+      -74.9558314
+    ],
+    "population2025": 1574281
+  },
+  {
+    "name": "Providence",
+    "state": "Rhode Island",
+    "slug": "providence-rhode-island",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 41.8239891,
+    "longitude": -71.4128343,
+    "geographicBounds": [
+      41.7724345,
+      -71.472667,
+      41.8618007,
+      -71.3737355
+    ],
+    "population2025": 195310
+  },
+  {
+    "name": "Charleston",
+    "state": "South Carolina",
+    "slug": "charleston-south-carolina",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 32.7884363,
+    "longitude": -79.9399309,
+    "geographicBounds": [
+      32.668505,
+      -80.1438459,
+      32.973515,
+      -79.797064
+    ],
+    "population2025": 159423
+  },
+  {
+    "name": "Sioux Falls",
+    "state": "South Dakota",
+    "slug": "sioux-falls-south-dakota",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 43.5476008,
+    "longitude": -96.7293629,
+    "geographicBounds": [
+      43.4642858,
+      -96.870657,
+      43.6452342,
+      -96.5979637
+    ],
+    "population2025": 213748
+  },
+  {
+    "name": "Nashville",
+    "state": "Tennessee",
+    "slug": "nashville-tennessee",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 36.1622767,
+    "longitude": -86.7742984,
+    "geographicBounds": [
+      35.967785,
+      -87.054766,
+      36.405496,
+      -86.515588
+    ],
+    "population2025": 721074
+  },
+  {
+    "name": "Houston",
+    "state": "Texas",
+    "slug": "houston-texas",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 29.7589382,
+    "longitude": -95.3676974,
+    "geographicBounds": [
+      29.5470115,
+      -95.9097419,
+      30.1103506,
+      -95.0120525
+    ],
+    "population2025": 2397315
+  },
+  {
+    "name": "Salt Lake City",
+    "state": "Utah",
+    "slug": "salt-lake-city-utah",
+    "country": "USA",
+    "timezone": "America/Denver",
+    "latitude": 40.7596198,
+    "longitude": -111.886797,
+    "geographicBounds": [
+      40.6999263,
+      -112.1013916,
+      40.8533905,
+      -111.7404843
+    ],
+    "population2025": 218428
+  },
+  {
+    "name": "Burlington",
+    "state": "Vermont",
+    "slug": "burlington-vermont",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 44.4761601,
+    "longitude": -73.212906,
+    "geographicBounds": [
+      44.4459066,
+      -73.2770437,
+      44.5398847,
+      -73.176125
+    ],
+    "population2025": 44019
+  },
+  {
+    "name": "Virginia Beach",
+    "state": "Virginia",
+    "slug": "virginia-beach-virginia",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 36.8496579,
+    "longitude": -75.9760751,
+    "geographicBounds": [
+      36.5504165,
+      -76.228243,
+      37.0302476,
+      -75.8318954
+    ],
+    "population2025": 453737
+  },
+  {
+    "name": "Seattle",
+    "state": "Washington",
+    "slug": "seattle-washington",
+    "country": "USA",
+    "timezone": "America/Los_Angeles",
+    "latitude": 47.6038321,
+    "longitude": -122.330062,
+    "geographicBounds": [
+      47.4810022,
+      -122.459696,
+      47.7341503,
+      -122.224433
+    ],
+    "population2025": 784777
+  },
+  {
+    "name": "Charleston",
+    "state": "West Virginia",
+    "slug": "charleston-west-virginia",
+    "country": "USA",
+    "timezone": "America/New_York",
+    "latitude": 38.3505995,
+    "longitude": -81.6332812,
+    "geographicBounds": [
+      38.281139,
+      -81.727777,
+      38.4042658,
+      -81.55931
+    ],
+    "population2025": 46117
+  },
+  {
+    "name": "Milwaukee",
+    "state": "Wisconsin",
+    "slug": "milwaukee-wisconsin",
+    "country": "USA",
+    "timezone": "America/Chicago",
+    "latitude": 43.0386475,
+    "longitude": -87.9090751,
+    "geographicBounds": [
+      42.920816,
+      -88.0710611,
+      43.1949437,
+      -87.8627124
+    ],
+    "population2025": 562407
+  },
+  {
+    "name": "Cheyenne",
+    "state": "Wyoming",
+    "slug": "cheyenne-wyoming",
+    "country": "USA",
+    "timezone": "America/Denver",
+    "latitude": 41.139981,
+    "longitude": -104.820246,
+    "geographicBounds": [
+      41.0730957,
+      -104.8611236,
+      41.1930263,
+      -104.6749326
+    ],
+    "population2025": 66507
+  }
+]

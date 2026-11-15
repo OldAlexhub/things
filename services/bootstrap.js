@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { AdminUser, City } from "../models/index.js";
 import { triggerSync } from './sync.js';
+import { expandUSCities } from './city-expansion.js';
 import { hashPassword } from "../lib/auth.js";
 import { seed } from "../scripts/seed.js";
 
@@ -77,6 +78,7 @@ export async function initializeServer() {
       try {await migrations.insertOne({_id:key,appliedAt:new Date()});}catch(error){if(error.code!==11000)throw error;}
     }
     await queuePhotoUpgrade();
+    await expandUSCities();
   }
 }
 

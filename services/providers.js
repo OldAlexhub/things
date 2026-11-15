@@ -49,16 +49,18 @@ export function normalizeOSM(element, city, categories) {
     lat = element.lat ?? element.center?.lat,
     lon = element.lon ?? element.center?.lon;
   if (!t.name || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const hotel = ['hotel','motel','hostel','guest_house','apartment'].includes(t.tourism);
   const category =
-    t.tourism === "museum"
+    hotel ? 'hotels' : t.tourism === "museum"
       ? "arts-culture-history"
       : t.amenity
       ? "food-drinks"
       : t.leisure === "park" || t.leisure === "nature_reserve"
       ? "outdoors-nature"
       : "attractions-theme-parks";
-  const free = t.fee === "no";
+  const free = !hotel && t.fee === "no";
   return {
+    kind: hotel ? 'hotel' : 'place',
     cityId: city._id,
     title: t.name,
     slug: slug(t.name, `osm-${element.type}-${element.id}`),
@@ -66,8 +68,8 @@ export function normalizeOSM(element, city, categories) {
       t.description?.slice(0, 300) ||
       "A place to discover. See the source and official venue for current details.",
     description:
-      t.description ||
-      "Venue details are sourced from OpenStreetMap. Confirm availability, accessibility and admission with the venue.",
+      t.description || (hotel ? 'A place to stay listed on OpenStreetMap. Check nightly rates, room availability and amenities directly with the property.' :
+      "Venue details are sourced from OpenStreetMap. Confirm availability, accessibility and admission with the venue."),
     categories: categories[category] ? [categories[category]] : [],
     tags: [
       category,
@@ -89,7 +91,7 @@ export function normalizeOSM(element, city, categories) {
       currency: "USD",
       note: free
         ? "OSM records no entrance fee. Other costs may apply."
-        : "Admission price unknown",
+        : hotel ? 'Nightly rates vary by dates and room. Check with the property.' : "Admission price unknown",
     },
     officialWebsite: safeUrl(t.website || t["contact:website"]),
     source: "osm",
@@ -111,12 +113,14 @@ export const providers = {
         city.latitude + 0.18,
         city.longitude + 0.18,
       ];
-      const box = [south, west, north, east].map(Number);
+      // Very large municipal boundaries (e.g. Anchorage) must not cause huge queries.
+      const latSpan = 50 / 111, lonSpan = 50 / (111 * Math.cos(city.latitude * Math.PI / 180));
+      const box = [Math.max(south, city.latitude-latSpan), Math.max(west,city.longitude-lonSpan), Math.min(north,city.latitude+latSpan), Math.min(east,city.longitude+lonSpan)].map(Number);
       if (box.some((n) => !Number.isFinite(n)))
         throw new Error("Invalid city geographic bounds");
       const b = box.join(",");
       // Separate quotas stop restaurants from exhausting the entire city import.
-      const query = `[out:json][timeout:45];nwr["tourism"~"^(museum|theme_park|zoo|gallery)$"]["name"](${b});out center tags 250;nwr["tourism"="attraction"]["name"][!"attraction"](${b});out center tags 150;nwr["leisure"~"^(park|nature_reserve)$"]["name"](${b});out center tags 200;nwr["amenity"~"^(restaurant|cafe)$"]["name"](${b});out center tags 150;`;
+      const query = `[out:json][timeout:45];nwr["tourism"~"^(museum|theme_park|zoo|gallery)$"]["name"](${b});out center tags 250;nwr["tourism"="attraction"]["name"][!"attraction"](${b});out center tags 150;nwr["leisure"~"^(park|nature_reserve)$"]["name"](${b});out center tags 200;nwr["amenity"~"^(restaurant|cafe)$"]["name"](${b});out center tags 150;nwr["tourism"~"^(hotel|motel|hostel|guest_house)$"]["name"](${b});out center tags 150;`;
       const data = await fetchJSON("https://overpass-api.de/api/interpreter", {
         method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: new URLSearchParams({data:query}),

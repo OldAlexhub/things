@@ -132,6 +132,7 @@ export async function runSyncJob(job, providerOverride) {
       else log.recordsUpdated++;
     }
     const hero=records.find(record=>record.images?.length)?.images?.[0];
+    if(job.source === 'osm' && records.length) await City.updateOne({_id:job.cityId},{$set:{catalogReady:true}});
     if(hero)await City.updateOne({_id:job.cityId,'heroImage.url':{$exists:false}},{$set:{heroImage:hero}});
     log.status = "success";
     log.lastSuccessfulSync = new Date();
@@ -226,6 +227,7 @@ export function startScheduler() {
         nextRunAt: { $lte: new Date() },
         lockedUntil: { $lte: new Date() },
       })
+        .sort({nextRunAt:1})
         .limit(4)
         .lean();
       for (const job of jobs) {

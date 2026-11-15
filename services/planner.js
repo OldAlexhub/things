@@ -49,6 +49,7 @@ export function hoursStatus(a, date, start, duration, now = new Date()) {
     : "closed";
 }
 export function eligible(a, input) {
+  if (a.kind === 'hotel' || a.tags?.includes('hotels')) return false;
   const cost = groupCost(a, input),
     ages = input.childAges,
     age = a.ageSuitability;

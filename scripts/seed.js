@@ -102,6 +102,7 @@ export async function seed() {
       }
     );
   const categories = [
+    ['Hotels & Places to Stay','hotels','Bed','primary'],
     [
       "Attractions & Theme Parks",
       "attractions-theme-parks",
