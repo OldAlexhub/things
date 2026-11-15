@@ -100,12 +100,19 @@ export async function runSyncJob(job, providerOverride) {
         log.recordsSkipped++;
         continue;
       }
-      const existing = await Model.findOne({
+      let existing = await Model.findOne({
         source: job.source,
         externalId: record.externalId,
       })
-        .select("publicationStatus images priceInformation verificationStatus lastVerifiedAt description shortDescription estimatedDuration operatingHours tags environment officialWebsite")
+        .select("cityId publicationStatus images priceInformation verificationStatus lastVerifiedAt description shortDescription estimatedDuration operatingHours tags environment officialWebsite")
         .lean();
+      // Nearby city bounding boxes can include the same venue. Never move an
+      // existing record (and its editor decisions) to the city being imported.
+      if (existing && String(existing.cityId) !== String(job.cityId)) {
+        record.externalId = `${job.cityId}:${record.externalId}`;
+        record.slug = `${record.slug}-${job.cityId}`;
+        existing = await Model.findOne({source: job.source, externalId: record.externalId}).lean();
+      }
       // Keep an editor's archive/unpublish decision across refreshes.
       if (existing && existing.publicationStatus !== "published")
         record.publicationStatus = existing.publicationStatus;

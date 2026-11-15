@@ -269,6 +269,21 @@ test("active lease prevents overlapping jobs", async () => {
   });
   assert.equal(await runSyncJob(job), false);
 });
+
+test('overlapping cities keep separate venue records and editor decisions', async () => {
+  const other = await City.create({name:'Neighbor',slug:'neighbor',country:'US',state:'FL',latitude:28.6,longitude:-81.3,timezone:'America/New_York',publicationStatus:'published'});
+  const original = await Activity.create({cityId:city._id,title:'Shared venue',slug:'shared-venue',source:'osm',externalId:'node/overlap',publicationStatus:'archived'});
+  const job = await SyncJob.create({key:'osm:overlap',source:'osm',cityId:other._id,lockedUntil:new Date(0)});
+  const provider = {model:'Activity',configured:()=>true,fetch:async()=>[{cityId:other._id,title:'Shared venue',slug:'shared-venue',source:'osm',externalId:'node/overlap',publicationStatus:'published'}]};
+  assert.equal((await runSyncJob(job,provider)).recordsInserted,1);
+  assert.equal((await runSyncJob(job,provider)).recordsUpdated,1);
+  const preserved = await Activity.findById(original._id);
+  assert.equal(String(preserved.cityId),String(city._id));
+  assert.equal(preserved.publicationStatus,'archived');
+  assert.equal(await Activity.countDocuments({source:'osm',externalId:{$in:['node/overlap',`${other._id}:node/overlap`]}}),2);
+  await Activity.deleteMany({_id:{$ne:original._id},cityId:other._id});
+  await Activity.deleteOne({_id:original._id}); await SyncJob.deleteOne({_id:job._id}); await City.deleteOne({_id:other._id});
+});
 test("provider normalization never invents price or hours", () => {
   const a = normalizeOSM(
     {
