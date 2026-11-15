@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101827" />
+    <title>Things to Do | Content Studio</title>
+    <link rel="icon" href="/brand/logo.png" />
+    <link rel="stylesheet" href="/studio.css" />
+  </head>
+  <body>
+    <div id="login" class="login">
+      <img class="lockup" src="/brand/logo-lockup.png" alt="Things to Do" />
+      <div class="eyebrow">OLD ALEX HUB / CONTENT STUDIO</div>
+      <h1>Great days start here.</h1>
+      <p>
+        Manage destinations, experiences and the details that make a day
+        memorable.
+      </p>
+      <form id="login-form">
+        <label
+          >Email<input
+            name="email"
+            type="email"
+            autocomplete="username"
+            required /></label
+        ><label
+          >Password<input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required /></label
+        ><button>Sign in to your studio →</button>
+      </form>
+    </div>
+    <div id="studio" hidden>
+      <aside>
+        <img src="/brand/logo-lockup.png" alt="Things to Do" /><span
+          class="eyebrow"
+          >CONTENT STUDIO</span
+        >
+        <nav id="nav"></nav>
+        <div class="aside-bottom">
+          <a href="/privacy.html">Privacy policy</a
+          ><button id="logout" class="quiet">Sign out</button
+          ><small>Old Alex Hub<br />info@oldalexhub.com</small>
+        </div>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <div class="eyebrow">DISCOVER. EXPLORE. EXPERIENCE.</div>
+            <h1 id="title">Overview</h1>
+          </div>
+          <button id="new">+ Create new</button>
+        </header>
+        <p id="description"></p>
+        <div id="toolbar">
+          <input
+            id="filter"
+            aria-label="Filter current page"
+            placeholder="Filter this page…"
+          /><button id="refresh" class="quiet">Refresh</button
+          ><button id="previous" class="quiet">Previous</button
+          ><span id="page"></span><button id="next" class="quiet">Next</button>
+        </div>
+        <section id="content"></section>
+      </main>
+    </div>
+    <dialog id="editor">
+      <form id="edit-form">
+        <header>
+          <div>
+            <div class="eyebrow">CONTENT EDITOR</div>
+            <h2 id="edit-title">Create</h2>
+          </div>
+          <button type="button" id="close" class="quiet">Close</button>
+        </header>
+        <p>
+          Review all fields before saving. Publishing makes content visible in
+          the Android app.
+        </p>
+        <div id="fields"></div>
+        <details>
+          <summary>Full record preview</summary>
+          <pre id="preview"></pre>
+        </details>
+        <footer>
+          <button type="button" id="preview-button" class="quiet">
+            Preview changes</button
+          ><button type="submit">Save changes</button>
+        </footer>
+      </form>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/studio.js" defer></script>
+  </body>
+</html>
