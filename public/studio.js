@@ -251,7 +251,9 @@ $("logout").onclick = async () => {
     toast(e.message);
   }
 };
+let loadSequence = 0;
 async function load() {
+  const sequence = ++loadSequence;
   document
     .querySelectorAll("nav button")
     .forEach((b) =>
@@ -264,6 +266,7 @@ async function load() {
   $("content").innerHTML = "<p>Loading your content…</p>";
   if (resource === "overview") {
     const d = (await api("overview")).data;
+    if (sequence !== loadSequence) return;
     $("content").innerHTML =
       '<div class="cards">' +
       Object.entries(d.counts)
@@ -290,6 +293,7 @@ async function load() {
     return;
   }
   const result = await api(resource + "?page=" + page);
+  if (sequence !== loadSequence) return;
   items = result.data;
   $("page").textContent = `Page ${page} · ${result.meta.total} records`;
   $("previous").disabled = page === 1;
@@ -297,6 +301,7 @@ async function load() {
   renderItems();
   if (resource === "sources") {
     const cities = (await api("cities")).data;
+    if (sequence !== loadSequence) return;
     const box = document.createElement("div");
     box.className = "panel";
     box.innerHTML =
