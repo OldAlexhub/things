@@ -40,6 +40,7 @@ try {
     .getByRole("button", { name: "Data sources", exact: true })
     .click();
   await page.getByRole("heading", { name: "Synchronize a city" }).waitFor();
+  assert.deepEqual(await page.locator('select[name="source"] option').allTextContents(), ['osm']);
   await page.screenshot({
     path: ".local/qa/admin-sources.png",
     fullPage: true,

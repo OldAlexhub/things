@@ -18,9 +18,11 @@ OpenStreetMap and scheduled synchronization are enabled by default. The first ru
 
 ```powershell
 npm ci --omit=dev
-# Use .env.production.example as .env on a new host.
+# The release server ZIP already contains a safe default .env.
 npm start
 ```
+
+The release ZIP includes a non-secret `.env` generated from `.env.production.example`; the private developer environment and credentials are never included. For a source checkout, copy that example to `.env`.
 
 The supplied production configuration uses `https://things.server.oldalexhub.com`. MongoDB defaults to `mongodb://127.0.0.1:27017/thingstodo`; change only `MONGODB_URI` if the host uses another database. Run MongoDB privately with persistent storage and backups. Route the HTTPS hostname to the server's port 3000, provide a valid certificate, and persist the `uploads` directory. `TRUST_PROXY` must match the actual reverse-proxy deployment.
 
