@@ -3,7 +3,8 @@ import {importReviewed} from "../scripts/quality-editorial.js";
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { AdminUser } from "../models/index.js";
+import { AdminUser, City } from "../models/index.js";
+import { triggerSync } from './sync.js';
 import { hashPassword } from "../lib/auth.js";
 import { seed } from "../scripts/seed.js";
 
@@ -75,5 +76,21 @@ export async function initializeServer() {
       await importReviewed();
       try {await migrations.insertOne({_id:key,appliedAt:new Date()});}catch(error){if(error.code!==11000)throw error;}
     }
+    await queuePhotoUpgrade();
   }
+}
+
+// Existing catalogs otherwise wait until their weekly import for new photos.
+// Queue once, without blocking startup on external providers or changing settings.
+export async function queuePhotoUpgrade() {
+  if ((process.env.SYNC_ENABLED ?? 'true') !== 'true') return;
+  const migrations=mongoose.connection.collection('contentMigrations');
+  const key='venue-photography-v2-2026-11-15';
+  if(await migrations.findOne({_id:key})) return;
+  for(const city of await City.find({publicationStatus:'published'}).select('_id').lean()) {
+    try { await triggerSync('osm',String(city._id)); }
+    catch(error) { if(error.status!==422) throw error; }
+  }
+  try { await migrations.insertOne({_id:key,appliedAt:new Date()}); }
+  catch(error) { if(error.code!==11000) throw error; }
 }

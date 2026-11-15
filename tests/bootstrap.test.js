@@ -5,8 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { ensureAdministrator } from "../services/bootstrap.js";
-import { AdminUser } from "../models/index.js";
+import { ensureAdministrator, queuePhotoUpgrade } from "../services/bootstrap.js";
+import { AdminUser, City, ContentSource, SyncJob } from "../models/index.js";
 import { verifyPassword } from "../lib/auth.js";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -103,4 +103,23 @@ test("database startup errors do not expose connection credentials", async () =>
       return true;
     }
   );
+});
+
+
+test('photo upgrade queues published cities once and respects disabled synchronization', async () => {
+  await City.deleteMany({}); await ContentSource.deleteMany({}); await SyncJob.deleteMany({});
+  const migration=mongoose.connection.collection('contentMigrations');
+  await migration.deleteMany({});
+  process.env.OSM_ENABLED='true'; process.env.SYNC_ENABLED='false';
+  const city=await City.create({name:'Orlando',slug:'orlando',country:'USA',timezone:'America/New_York',latitude:28.54,longitude:-81.37,publicationStatus:'published'});
+  await City.create({name:'Draft city',slug:'draft',country:'USA',timezone:'America/New_York',latitude:28,longitude:-81,publicationStatus:'draft'});
+  await ContentSource.create({name:'osm',enabled:true,permissionReviewed:true,license:'ODbL 1.0',intervalMinutes:10080,retentionHours:336});
+  await queuePhotoUpgrade(); assert.equal(await SyncJob.countDocuments(),0);
+  process.env.SYNC_ENABLED='true'; await queuePhotoUpgrade();
+  assert.equal(await SyncJob.countDocuments(),1);
+  const future=new Date(Date.now()+7*86400000);
+  await SyncJob.updateOne({cityId:city._id},{$set:{nextRunAt:future}});
+  await queuePhotoUpgrade();
+  assert.equal((await SyncJob.findOne({cityId:city._id})).nextRunAt.getTime(),future.getTime());
+  delete process.env.SYNC_ENABLED; delete process.env.OSM_ENABLED;
 });
