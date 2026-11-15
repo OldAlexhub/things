@@ -92,6 +92,12 @@
         </footer>
       </form>
     </dialog>
+    <dialog id="city-wizard">
+      <form id="city-search"><header><div><div class="eyebrow">NEW DESTINATION</div><h2>Add a city in minutes.</h2></div><button type="button" id="city-close" class="quiet">Close</button></header>
+      <p>Find the city, confirm its time zone, and enable it. Free place imports, categories and the discovery feed are prepared automatically.</p>
+      <label>City and state or country<input id="city-query" placeholder="e.g. Tampa, Florida" required minlength="3"></label><button id="city-find">Find city</button><p id="city-search-status" role="status"></p><div id="city-results"></div></form>
+      <form id="city-create" hidden><h3 id="city-selected"></h3><label>Time zone<select id="city-timezone"><option value="America/New_York">Eastern</option><option value="America/Chicago">Central</option><option value="America/Denver">Mountain</option><option value="America/Phoenix">Arizona</option><option value="America/Los_Angeles">Pacific</option><option value="America/Anchorage">Alaska</option><option value="Pacific/Honolulu">Hawaii</option><option value="Europe/London">United Kingdom</option><option value="Europe/Paris">Central Europe</option></select></label><label>Or another IANA time zone (optional)<input id="city-custom-zone" placeholder="e.g. Asia/Tokyo"></label><label>Welcome message<textarea id="city-welcome" required></textarea></label><p>Enabling makes this city available to the app. Its first import may take a few minutes. No APK update or environment changes are needed.</p><button id="city-enable">Enable city & import places</button><p id="city-create-status" role="status"></p></form>
+    </dialog>
     <div id="toast" role="status" aria-live="polite" hidden></div>
     <script src="/studio.js" defer></script>
   </body>

@@ -1,3 +1,4 @@
+import {qualityScore, cachePhoto} from "./photography.js";
 import { randomUUID } from "node:crypto";
 import {
   Activity,
@@ -103,11 +104,19 @@ export async function runSyncJob(job, providerOverride) {
         source: job.source,
         externalId: record.externalId,
       })
-        .select("publicationStatus")
+        .select("publicationStatus images priceInformation verificationStatus lastVerifiedAt description shortDescription estimatedDuration operatingHours tags environment officialWebsite")
         .lean();
       // Keep an editor's archive/unpublish decision across refreshes.
       if (existing && existing.publicationStatus !== "published")
         record.publicationStatus = existing.publicationStatus;
+      if(existing?.images?.length && !record.images?.length) record.images=existing.images;
+      if(existing?.verificationStatus === "verified") {
+        for(const field of ['images','priceInformation','verificationStatus','lastVerifiedAt','description','shortDescription','estimatedDuration','operatingHours','tags','environment','officialWebsite']) {
+          if(existing[field] !== undefined) record[field]=existing[field];
+        }
+      }
+      if(record.images?.length) record.images = await Promise.all(record.images.map(cachePhoto));
+      record.qualityScore=qualityScore(record);
       const result = await Model.updateOne(
         { source: job.source, externalId: record.externalId },
         {
@@ -122,6 +131,8 @@ export async function runSyncJob(job, providerOverride) {
       if (result.upsertedCount) log.recordsInserted++;
       else log.recordsUpdated++;
     }
+    const hero=records.find(record=>record.images?.length)?.images?.[0];
+    if(hero)await City.updateOne({_id:job.cityId,'heroImage.url':{$exists:false}},{$set:{heroImage:hero}});
     log.status = "success";
     log.lastSuccessfulSync = new Date();
     await ContentSource.updateOne(

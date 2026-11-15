@@ -118,6 +118,7 @@ export const Category = model("Category", {
 const activity = {
   cityId: ref("City", true),
   title: { type: String, required: true },
+  qualityScore: { type: Number, default: 0, index: true },
   slug: { type: String, required: true },
   description: String,
   shortDescription: String,
@@ -133,6 +134,7 @@ const activity = {
     known: { type: Boolean, default: false },
     adult: Number,
     child: Number,
+    childBands: [{ _id: false, minAge: Number, maxAge: Number, amount: Number }],
     currency: { type: String, default: "USD" },
     perGroup: Boolean,
     note: String,
@@ -203,6 +205,7 @@ export const Event = model(
 export const Collection = model("Collection", {
   cityId: ref("City", true),
   title: { type: String, required: true },
+  qualityScore: { type: Number, default: 0, index: true },
   slug: String,
   description: String,
   coverImage: image,

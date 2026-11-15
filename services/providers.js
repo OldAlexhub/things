@@ -1,3 +1,4 @@
+import {linkedPhotos, qualityScore} from "./photography.js";
 const UA = "ThingsToDo/1.0 (Old Alex Hub; info@oldalexhub.com)";
 export async function fetchJSON(url, options = {}) {
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -69,6 +70,7 @@ export function normalizeOSM(element, city, categories) {
       "Venue details are sourced from OpenStreetMap. Confirm availability, accessibility and admission with the venue.",
     categories: categories[category] ? [categories[category]] : [],
     tags: [
+      category,
       ...(free ? ["free"] : []),
       ...(category === "outdoors-nature" ? ["outdoors"] : []),
     ],
@@ -113,17 +115,23 @@ export const providers = {
       if (box.some((n) => !Number.isFinite(n)))
         throw new Error("Invalid city geographic bounds");
       const b = box.join(",");
-      const query = `[out:json][timeout:30];(nwr["tourism"~"^(attraction|museum|theme_park|zoo|gallery)$"]["name"](${b});nwr["leisure"~"^(park|nature_reserve)$"]["name"](${b});nwr["amenity"~"^(restaurant|cafe)$"]["name"](${b}););out center tags 600;`;
+      // Separate quotas stop restaurants from exhausting the entire city import.
+      const query = `[out:json][timeout:45];nwr["tourism"~"^(museum|theme_park|zoo|gallery)$"]["name"](${b});out center tags 250;nwr["tourism"="attraction"]["name"][!"attraction"](${b});out center tags 150;nwr["leisure"~"^(park|nature_reserve)$"]["name"](${b});out center tags 200;nwr["amenity"~"^(restaurant|cafe)$"]["name"](${b});out center tags 150;`;
       const data = await fetchJSON("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ data: query }),
+        method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({data:query}),
       });
-      if (!Array.isArray(data.elements) || data.remark)
-        throw new Error("Incomplete OpenStreetMap response");
-      return data.elements
-        .map((e) => normalizeOSM(e, city, categories))
-        .filter(Boolean);
+      if (!Array.isArray(data.elements) || data.remark) throw new Error("Incomplete OpenStreetMap response");
+      const elements = [...new Map(data.elements.map(e => [`${e.type}/${e.id}`,e])).values()];
+      const photos = await linkedPhotos(elements, city);
+      return elements.map(e=> {
+        const record = normalizeOSM(e,city,categories);
+        if(!record)return null;
+        const photo = photos.get(record.externalId);
+        if(photo)record.images=[{...photo,alt:record.title}];
+        record.qualityScore=qualityScore(record);
+        return record;
+      }).filter(Boolean);
     },
   },
 };

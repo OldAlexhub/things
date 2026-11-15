@@ -340,3 +340,5 @@ pre {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+#city-wizard {width:min(680px,90vw);max-height:85vh;overflow:auto} .city-result {display:block;width:100%;text-align:left;margin:10px 0} #city-create {margin-top:24px;padding-top:20px;border-top:1px solid #344354} #city-search-status,#city-create-status {min-height:1.5em}

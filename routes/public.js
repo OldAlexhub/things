@@ -228,7 +228,7 @@ for (const [path, Model] of [
           ? { score: { $meta: "textScore" }, _id: 1 }
           : path === "events"
           ? { startAt: 1, _id: 1 }
-          : { updatedAt: -1, _id: 1 };
+          : { qualityScore: -1, updatedAt: -1, _id: 1 };
       [data, total] = await Promise.all([
         Model.find(q, p.q ? { score: { $meta: "textScore" } } : {})
           .sort(sort)
@@ -330,7 +330,7 @@ publicRouter.get("/cities/:cityId/home", async (req, res) => {
             ...visible(),
             ...(s.tags?.length ? { tags: { $in: s.tags } } : {}),
           })
-            .sort({ updatedAt: -1 })
+            .sort({ qualityScore: -1, updatedAt: -1 })
             .limit(8)
             .lean();
         return { ...s, items };

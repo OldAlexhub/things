@@ -452,6 +452,7 @@ function openEditor(item) {
     "lastSyncedAt",
     "expiresAt",
     "lastSuccessfulSync",
+    "qualityScore",
   ])
     delete data[key];
   for (const value of Object.values(data))
@@ -571,7 +572,7 @@ function mediaForm() {
     }
   };
 }
-$("new").onclick = () => openEditor();
+$("new").onclick = () => resource === "cities" ? openCityWizard() : openEditor();
 $("close").onclick = () => $("editor").close();
 $("filter").oninput = renderItems;
 $("refresh").onclick = () => load().catch((e) => toast(e.message));
@@ -586,3 +587,17 @@ $("next").onclick = () => {
 api("session")
   .then((r) => activate(r.data))
   .catch(() => {});
+
+let selectedCity;
+function openCityWizard(){selectedCity=null;$("city-custom-zone").value="";$("city-create").hidden=true;$("city-results").replaceChildren();$("city-search-status").textContent='';$("city-create-status").textContent='';$("city-wizard").showModal();$("city-query").focus();}
+$("city-close").onclick=()=>$("city-wizard").close();
+$("city-search").onsubmit=async e=>{e.preventDefault();$("city-find").disabled=true;$("city-search-status").textContent='Finding your city...';try{
+  const result=await api('city-lookup?q='+encodeURIComponent($("city-query").value));$("city-results").replaceChildren();$("city-search-status").textContent=result.data.length?'Choose the correct destination.':'No city found. Try adding its state or country.';
+  for(const city of result.data){const button=document.createElement('button');button.type='button';button.className='city-result quiet';button.textContent=city.label;button.onclick=()=>{selectedCity=city;$("city-selected").textContent=city.label;$("city-welcome").value=`Find your next good day in ${city.name}. Explore local places and build a day around what you love.`;$("city-timezone").value=city.longitude < -115?'America/Los_Angeles':city.longitude < -102?'America/Denver':city.longitude < -85?'America/Chicago':'America/New_York';$("city-create").hidden=false;$("city-create").scrollIntoView({behavior:'smooth'});};$("city-results").append(button);}
+}catch(err){$("city-search-status").textContent=err.message;}finally{$("city-find").disabled=false;}};
+$("city-create").onsubmit=async e=>{e.preventDefault();if(!selectedCity)return;$("city-enable").disabled=true;$("city-create-status").textContent='Preparing the destination...';try{
+  const {label,...city}=selectedCity;
+  const slug=[city.name,city.state||city.country].join('-').normalize('NFKD').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const data={...templates.cities,...city,slug,description:$("city-welcome").value,timezone:$("city-custom-zone").value.trim()||$("city-timezone").value,publicationStatus:'published',homeSections:[{key:'discover',title:'Worth a place in your day',type:'activities',visible:true,order:0,tags:[]},{key:'outdoors',title:'A little fresh air',type:'activities',visible:true,order:1,tags:['outdoors']},{key:'free',title:'Good days. Small budgets.',type:'activities',visible:true,order:2,tags:['free']}]};
+  await api('cities',{method:'POST',body:JSON.stringify(data)});$("city-wizard").close();await load();toast('City enabled. Places and licensed photos are importing automatically. Check Your studio for progress.');
+}catch(err){$("city-create-status").textContent=err.message;}finally{$("city-enable").disabled=false;}};

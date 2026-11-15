@@ -1,0 +1,179 @@
+[
+  {
+    "title": "Lake Eola Park",
+    "key": "orlando-lake-eola-park",
+    "category": "outdoors-nature",
+    "coords": [
+      -81.375257,
+      28.5438382
+    ],
+    "address": "512 East Washington Street, Orlando, FL 32801",
+    "short": "A lakeside loop, skyline views, and room to slow down.",
+    "description": "Walk the 0.9-mile loop around Lake Eola in downtown Orlando. General park access is free; boat rentals, parking and special events can cost extra. The suggested visit length is a planning allowance, not a venue requirement.",
+    "price": {
+      "known": true,
+      "adult": 0,
+      "child": 0,
+      "note": "Free general park access. Rentals, parking and special events are separate."
+    },
+    "url": "https://www.orlando.gov/Parks-the-Environment/Directory/Lake-Eola-Park",
+    "photo": {
+      "url": "/city/orlando-lake-eola.jpg",
+      "alt": "Lake Eola and downtown Orlando",
+      "credit": "JER3L1337; resized and cropped for display",
+      "license": "CC BY 4.0",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Eola_and_Orlando_Skyline_seen_in_2024.jpg"
+    },
+    "duration": [
+      45,
+      75
+    ],
+    "environment": "outdoor"
+  },
+  {
+    "title": "Harry P. Leu Gardens",
+    "key": "orlando-leu-gardens",
+    "category": "outdoors-nature",
+    "coords": [
+      -81.3574825,
+      28.5678838
+    ],
+    "address": "1920 North Forest Avenue, Orlando, FL 32803",
+    "short": "Take a colorful detour through Orlando's botanical gardens.",
+    "description": "Explore the botanical gardens at your own pace. The historic Leu House Museum is temporarily closed. General admission does not include separately ticketed events. Allow about 90 minutes for a relaxed visit; check the official calendar before heading out.",
+    "price": {
+      "known": true,
+      "adult": 15,
+      "childBands": [
+        {
+          "minAge": 0,
+          "maxAge": 3,
+          "amount": 0
+        },
+        {
+          "minAge": 4,
+          "maxAge": 17,
+          "amount": 10
+        }
+      ],
+      "note": "Adults $15; ages 4-17 $10; under 4 free. Special events are separate. Checked November 15, 2026."
+    },
+    "url": "https://www.leugardens.org/Visit/Admission-Hours",
+    "photo": {
+      "url": "/editorial/3bd9357fe86757dfc36c10d53796f886.webp",
+      "credit": "KimonBerlin",
+      "license": "CC BY-SA 2.0",
+      "alt": "Flowers at Harry P. Leu Gardens",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Harry_P_Leu_Gardens_(9059512600).jpg"
+    },
+    "duration": [
+      60,
+      90
+    ],
+    "environment": "outdoor"
+  },
+  {
+    "title": "Mead Botanical Garden",
+    "key": "orlando-mead-garden",
+    "category": "outdoors-nature",
+    "coords": [
+      -81.358917,
+      28.58449
+    ],
+    "address": "1300 South Denning Drive, Winter Park, FL 32789",
+    "short": "A free garden escape with trails and a boardwalk.",
+    "description": "Spend some unhurried time among gardens, walking trails and the boardwalk in Winter Park. General admission is free. Special programs and events may have separate fees; consult the garden website for access updates and event details.",
+    "price": {
+      "known": true,
+      "adult": 0,
+      "child": 0,
+      "note": "Free general admission. Some programs and events have separate fees. Checked November 15, 2026."
+    },
+    "url": "https://meadgarden.org/visit/",
+    "photo": {
+      "url": "/editorial/e46230cb4314b1632b786775f522efc7.webp",
+      "credit": "Jennaraehn",
+      "license": "CC0",
+      "alt": "The Grove at Mead Botanical Garden",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Grove_at_Mead_Botanical_Garden.jpg"
+    },
+    "duration": [
+      45,
+      75
+    ],
+    "environment": "outdoor"
+  },
+  {
+    "title": "Rollins Museum of Art",
+    "key": "orlando-rollins-museum",
+    "category": "arts-culture-history",
+    "coords": [
+      -81.3462235,
+      28.5921643
+    ],
+    "address": "Rollins College, Winter Park, FL",
+    "short": "Make time for art. General admission is free.",
+    "description": "Discover changing exhibitions at the Rollins Museum of Art on the Rollins College campus. General admission is free. Check current opening hours and exhibitions before your visit. Group visits and some special events may require arrangements.",
+    "price": {
+      "known": true,
+      "adult": 0,
+      "child": 0,
+      "note": "Free general admission. Check special event and group requirements. Checked November 15, 2026."
+    },
+    "url": "https://www.rollins.edu/rma/visit/faqs/",
+    "photo": {
+      "url": "/editorial/acb6af2711d29a1b528fd54db7e675ab.webp",
+      "credit": "Ebyabe",
+      "license": "CC BY-SA 3.0",
+      "alt": "Rollins Museum of Art exterior, formerly Cornell Fine Arts Museum",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rollins_College_Cornell_Museum01.jpg"
+    },
+    "duration": [
+      45,
+      75
+    ],
+    "environment": "indoor"
+  },
+  {
+    "title": "Orlando Museum of Art",
+    "key": "orlando-museum-of-art",
+    "category": "arts-culture-history",
+    "coords": [
+      -81.365173,
+      28.5727975
+    ],
+    "address": "2416 North Mills Avenue, Orlando, FL 32803",
+    "short": "A thoughtful afternoon with art in Loch Haven Park.",
+    "description": "Explore the Orlando Museum of Art in Loch Haven Park. Check the current exhibitions and opening calendar before you go. The estimate uses standard individual admission; a family package or other discount may be better value. Special events can be priced separately.",
+    "price": {
+      "known": true,
+      "adult": 20,
+      "childBands": [
+        {
+          "minAge": 0,
+          "maxAge": 5,
+          "amount": 0
+        },
+        {
+          "minAge": 6,
+          "maxAge": 17,
+          "amount": 8
+        }
+      ],
+      "note": "Adults $20; ages 6-17 $8; under 6 free. A $45 family package covers 2 adults and up to 3 children. Estimate uses individual rates. Checked November 15, 2026."
+    },
+    "url": "https://omart.org/visit/",
+    "photo": {
+      "url": "/editorial/42296b2a75fd6a4c73ee09834a62bfdf.webp",
+      "credit": "Ebyabe",
+      "license": "CC BY-SA 3.0",
+      "alt": "Orlando Museum of Art exterior",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Orlando_FL_Museum_of_Art01.jpg"
+    },
+    "duration": [
+      60,
+      90
+    ],
+    "environment": "indoor"
+  }
+]

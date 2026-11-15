@@ -19,12 +19,11 @@ export function groupCost(a, input) {
   const p = a.priceInformation;
   if (!p?.known || p.adult == null || p.currency !== "USD") return null;
   if (p.perGroup) return p.adult;
-  if (input.childAges.length && p.child == null) return null;
-  return (
-    Math.round(
-      (p.adult * input.adults + (p.child || 0) * input.childAges.length) * 100
-    ) / 100
+  const childPrices = input.childAges.map(age =>
+    p.childBands?.find(band => age >= band.minAge && age <= band.maxAge)?.amount ?? p.child
   );
+  if (childPrices.some(amount => amount == null)) return null;
+  return Math.round((p.adult * input.adults + childPrices.reduce((sum, amount) => sum + amount, 0)) * 100) / 100;
 }
 export function hoursStatus(a, date, start, duration, now = new Date()) {
   const h = a.operatingHours;

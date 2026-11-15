@@ -1,3 +1,4 @@
+import {qualityScore} from "../services/photography.js";
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
@@ -86,6 +87,15 @@ adminRouter.get("/overview", async (_req, res) => {
         .lean(),
     },
   });
+});
+// Explicit city search only: no keystroke/autocomplete requests to Nominatim.
+const cityLookupLimit = rateLimit({windowMs:1100,limit:1,standardHeaders:'draft-8',legacyHeaders:false});
+adminRouter.get('/city-lookup',cityLookupLimit,async(req,res)=>{
+  const q=z.string().trim().min(3).max(120).parse(req.query.q);
+  const response=await fetch('https://nominatim.openstreetmap.org/search?'+new URLSearchParams({q,format:'jsonv2',addressdetails:'1',limit:'5',featuretype:'city'}),{headers:{'User-Agent':'ThingsToDo/1.1 (Old Alex Hub; info@oldalexhub.com)'},signal:AbortSignal.timeout(15000)});
+  if(!response.ok)throw Object.assign(new Error('City search is temporarily unavailable. Please try again.'),{status:502});
+  const rows=await response.json();
+  res.json({data:rows.map(row=>({name:row.name,state:row.address?.state||'',country:row.address?.country||'',latitude:Number(row.lat),longitude:Number(row.lon),geographicBounds:[Number(row.boundingbox[0]),Number(row.boundingbox[2]),Number(row.boundingbox[1]),Number(row.boundingbox[3])],label:row.display_name}))});
 });
 async function audit(req, action, resource, resourceId, fields = []) {
   await AdminAuditLog.create({
@@ -227,12 +237,14 @@ adminRouter.post("/:resource", async (req, res) => {
     return res.status(400).json({ error: { message: "Use image upload" } });
   const data = validateRecord(req.params.resource, req.body);
   await validateRefs(req.params.resource, data);
+  if (["activities", "events"].includes(req.params.resource)) data.qualityScore = qualityScore(data);
   if (
     req.params.resource === "cities" &&
     data.publicationStatus === "published"
   )
     data.publishedAt = new Date();
   const item = await req.resourceModel.create(data);
+  if(req.params.resource === 'cities' && data.publicationStatus === 'published') await triggerSync('osm',String(item._id)).catch(()=>{});
   await audit(
     req,
     "create",
@@ -250,6 +262,7 @@ adminRouter.put("/:resource/:id", async (req, res) => {
     });
   const data = validateRecord(req.params.resource, req.body);
   await validateRefs(req.params.resource, data);
+  if (["activities", "events"].includes(req.params.resource)) data.qualityScore = qualityScore(data);
   if (
     req.params.resource === "cities" &&
     data.publicationStatus === "published"

@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import {importReviewed} from "../scripts/quality-editorial.js";
 import { randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -65,5 +67,13 @@ export async function initializeServer() {
           : { passwordSource: "environment" }),
       })
     );
-  if ((process.env.AUTO_SEED ?? "true") === "true") await seed();
+  if ((process.env.AUTO_SEED ?? "true") === "true") {
+    await seed();
+    const migrations=mongoose.connection.collection('contentMigrations');
+    const key='orlando-reviewed-2026-11-15';
+    if(!await migrations.findOne({_id:key})) {
+      await importReviewed();
+      try {await migrations.insertOne({_id:key,appliedAt:new Date()});}catch(error){if(error.code!==11000)throw error;}
+    }
+  }
 }
