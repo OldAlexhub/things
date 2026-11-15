@@ -9,12 +9,13 @@ import {
   ContentSource,
   AppVersion,
   SyncJob,
+  EventFeed,
 } from "../models/index.js";
 import { hashPassword } from "../lib/auth.js";
 export async function seed() {
   // Remove obsolete provider configuration, without changing saved editorial content.
-  await ContentSource.deleteMany({ name: { $nin: ["osm"] } });
-  await SyncJob.deleteMany({ source: { $nin: ["osm"] } });
+  await ContentSource.deleteMany({ name: { $nin: ["osm","calendars"] } });
+  await SyncJob.deleteMany({ source: { $nin: ["osm","calendars"] } });
   const city = await City.findOneAndUpdate(
     { slug: "orlando" },
     {
@@ -152,6 +153,7 @@ export async function seed() {
       { upsert: true }
     );
   for (const source of [
+    {name:'calendars',license:'Public calendar facts; organizer retains original content',attribution:'Event organizers — see each event source',termsUrl:'https://events.ucf.edu/',intervalMinutes:360,retentionHours:48},
     {
       name: "osm",
       license: "ODbL 1.0",
@@ -166,12 +168,16 @@ export async function seed() {
       {
         $setOnInsert: {
           ...source,
-          enabled: (process.env.OSM_ENABLED ?? "true") === "true",
+          enabled: (process.env[source.name==='osm'?'OSM_ENABLED':'EVENTS_ENABLED'] ?? "true") === "true",
           permissionReviewed: true,
         },
       },
       { upsert: true }
     );
+  await EventFeed.updateOne({cityId:city._id,url:'https://events.ucf.edu/calendar/1/ucf-events/upcoming/feed.ics'},{$setOnInsert:{
+    cityId:city._id,name:'University of Central Florida events',url:'https://events.ucf.edu/calendar/1/ucf-events/upcoming/feed.ics',
+    sourceUrl:'https://events.ucf.edu/calendar/1/ucf-events/upcoming/',enabled:true,permissionReviewed:true,
+  }},{upsert:true});
   await AppVersion.updateOne(
     { platform: "android" },
     {

@@ -18,6 +18,7 @@ import {
 } from "../models/index.js";
 import { runSyncJob, queuePublishedCitySyncs } from "../services/sync.js";
 import { normalizeOSM, providers } from "../services/providers.js";
+import {checkMentions} from '../services/mentions.js';
 process.env.NODE_ENV = "test";
 test('hotel discovery keeps room rates separate from admission and day plans', async () => {
   const normalized=normalizeOSM({type:'node',id:980001,lat:city.latitude,lon:city.longitude,tags:{name:'Test lodging',tourism:'hotel',fee:'no'}},city,{});
@@ -282,7 +283,7 @@ test("provider normalization never invents price or hours", () => {
   );
   assert.equal(a.priceInformation.known, false);
   assert.equal(a.operatingHours, undefined);
-  assert.deepEqual(Object.keys(providers), ["osm"]);
+  assert.deepEqual(Object.keys(providers).sort(), ['calendars', 'osm']);
 });
 
 test("editor can clear optional fields and cannot reference a missing city", async () => {
@@ -395,4 +396,20 @@ test("only the free configured provider can be requested for synchronization", a
     .set("X-CSRF-Token", csrf)
     .send({ source: "unsupported-provider", cityId: String(city._id) });
   assert.equal(r.status, 400);
+});
+test('campaign dashboard is private and distinguishes successful empty checks from failures',async()=>{
+  assert.equal((await request(app).get('/api/v1/admin/campaign')).status,401);
+  await checkMentions({fetcher:async url=>url.includes('bsky')?{ok:true,json:async()=>({posts:[]})}:{ok:false,status:503}});
+  const result=await agent.get('/api/v1/admin/campaign');
+  assert.equal(result.status,200);assert.equal(result.body.data.hashtag,'#old_alex_hub');
+  assert.equal(result.body.data.checks.find(c=>c.source==='Bluesky').status,'ok');
+  assert.equal(result.body.data.checks.find(c=>c.source==='Mastodon').status,'unavailable');
+  assert.equal(result.body.data.mentions.length,0);
+  assert.equal((await agent.post('/api/v1/admin/campaign/mentions').send({url:'https://example.org/post'})).status,403);
+  const created=await agent.post('/api/v1/admin/campaign/mentions').set('X-CSRF-Token',csrf).send({url:'https://example.org/post',excerpt:'A test link'});
+  assert.equal(created.status,201);
+  const repeat=await agent.post('/api/v1/admin/campaign/mentions').set('X-CSRF-Token',csrf).send({url:'https://example.org/post'});
+  assert.equal(repeat.body.data._id,created.body.data._id);
+  await agent.delete('/api/v1/admin/campaign/mentions/'+created.body.data._id).set('X-CSRF-Token',csrf);
+  assert.equal((await agent.get('/api/v1/admin/campaign')).body.data.mentions.length,0);
 });

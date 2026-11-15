@@ -4,6 +4,7 @@ import { connectDatabase } from "./db/connect.js";
 import { createApp } from "./app.js";
 import { startScheduler } from "./services/sync.js";
 import { initializeServer } from "./services/bootstrap.js";
+import {startMentionMonitor} from './services/mentions.js';
 let startupStage = "database";
 try {
   await connectDatabase();
@@ -22,8 +23,10 @@ try {
       )
   );
   const stop = startScheduler();
+  const stopMentions=startMentionMonitor();
   const shutdown = () => {
     stop();
+    stopMentions();
     server.close(async () => {
       await mongoose.disconnect();
       process.exit(0);

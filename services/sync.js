@@ -188,6 +188,7 @@ export async function queuePublishedCitySyncs() {
   for (const source of sources) {
     if (!providers[source.name].configured()) continue;
     for (const city of cities)
+      if(!providers[source.name].available || await providers[source.name].available(city))
       await SyncJob.updateOne(
         { key: `${source.name}:${city._id}` },
         {
@@ -227,7 +228,7 @@ export function startScheduler() {
         nextRunAt: { $lte: new Date() },
         lockedUntil: { $lte: new Date() },
       })
-        .sort({nextRunAt:1})
+        .sort({source:1,nextRunAt:1})
         .limit(4)
         .lean();
       for (const job of jobs) {

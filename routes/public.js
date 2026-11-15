@@ -254,6 +254,7 @@ for (const [path, Model] of [
     const data = await Model.findOne({
       _id: req.params.id,
       ...visible(),
+      ...(path === 'hotels' ? {kind:'hotel'} : {}),
       ...(path === "events" ? upcoming() : {}),
     }).lean();
     if (!data)

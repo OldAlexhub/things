@@ -6,6 +6,8 @@ let csrf = "",
   editing = null;
 const labels = {
   overview: "Your studio",
+  campaign: 'Hashtag & memories',
+  feeds: 'Event calendars',
   cities: "Destinations",
   categories: "Categories",
   activities: "Experiences",
@@ -17,6 +19,8 @@ const labels = {
 };
 const descriptions = {
   overview: "A thoughtful experience begins with good information.",
+  campaign:'Follow public #old_alex_hub memories and keep useful links in one place.',
+  feeds:'Connect free public iCalendar feeds to a city. Event facts and organizer links refresh every six hours. No paid event API is used.',
   cities:
     "Publish a destination to make it available in the app. Its homepage order, theme and content are managed here.",
   categories:
@@ -33,6 +37,7 @@ const descriptions = {
     "Use numeric Android version codes. Google Play independently determines update availability.",
 };
 const templates = {
+  feeds:{cityId:'',name:'',url:'',sourceUrl:'',enabled:true,permissionReviewed:false},
   cities: {
     name: "",
     slug: "",
@@ -261,9 +266,14 @@ async function load() {
     );
   $("title").textContent = labels[resource];
   $("description").textContent = descriptions[resource];
-  $("new").hidden = resource === "overview" || resource === "media";
-  $("toolbar").hidden = resource === "overview";
+  $("new").hidden = ['overview','media','campaign'].includes(resource);
+  $("toolbar").hidden = ['overview','campaign'].includes(resource);
   $("content").innerHTML = "<p>Loading your content…</p>";
+  if(resource === 'campaign') {
+    const d=(await api('campaign')).data;
+    if(sequence!==loadSequence)return;
+    renderCampaign(d); return;
+  }
   if (resource === "overview") {
     const d = (await api("overview")).data;
     if (sequence !== loadSequence) return;
@@ -347,6 +357,19 @@ function table(data, fields) {
     "</tbody></table>"
   );
 }
+function renderCampaign(d) {
+  const external=(url,label)=>`<a class="quiet" target="_blank" rel="noopener noreferrer" href="${esc(url)}">${esc(label)} ↗</a>`;
+  const when=value=>value?new Date(value).toLocaleString():'Not checked yet';
+  $('content').innerHTML=`<div class="campaign-hero"><div class="eyebrow">MEMORIES OUT IN THE WORLD</div><h2>${esc(d.hashtag)}</h2><p>${esc(d.coverage)}</p><button id="check-mentions" ${d.enabled?'':'disabled'}>Check public mentions</button><small> ${d.enabled?'Automatic checks run hourly. Manual checks are limited to once a minute.':'Automatic tracking is disabled in the server environment.'}</small></div>
+    <div class="cards"><article class="stat"><span class="muted">Visible mentions · last 30 days</span><strong>${d.mentions.length}${d.mentions.length===100?'+':''}</strong></article><article class="stat"><span class="muted">Automatic sources responding</span><strong>${d.checks.filter(c=>c.status==='ok').length} / 2</strong></article></div>
+    <div class="panel"><h2>Source coverage</h2>${d.checks.length?d.checks.map(c=>`<article class="source-check"><strong>${esc(c.source)}</strong><span class="badge">${c.status==='ok'?'Checked':'Unavailable'}</span><p>${esc(c.message)}</p><small>Last attempt: ${esc(when(c.checkedAt))} · Last success: ${esc(when(c.lastSuccessAt))}${c.status==='ok'?` · ${c.found} recent matches returned`:''}</small></article>`).join(''):'<p>The first public-source check has not run yet.</p>'}</div>
+    <div class="panel"><h2>Search across the web</h2><p>These open searches on each site. Sign-in may be required. They are not automatic tracking sources.</p><div class="campaign-links">${d.links.map(([name,url])=>external(url,name)).join('')}</div></div>
+    <div class="panel"><h2>Keep a public post</h2><p>Found a memory on another site? Save its link here for 30 days. No private posts or account access are collected.</p><form id="save-mention"><label>Public post URL<input name="url" type="url" placeholder="https://…" required maxlength="2000"></label><label>Creator / account (optional)<input name="author" maxlength="160"></label><label>Your note (optional)<input name="excerpt" maxlength="300"></label><button>Save link</button></form></div>
+    <div class="panel"><h2>Recent public memories</h2>${d.mentions.length?d.mentions.map(m=>`<article class="mention"><div><span class="badge">${esc(m.source)}</span> <strong>${esc(m.author || 'Public post')}</strong><p>${esc(m.excerpt || 'Open the original post to view this memory.')}</p><small>${esc(when(m.postedAt || m.createdAt))}${m.source!=='Saved link'?` · ${m.likes||0} likes · ${m.reposts||0} reposts at last check`:''}</small></div><div>${external(m.url,'View original')}<button class="quiet" data-hide-mention="${m._id}">Hide</button></div></article>`).join(''):'<div class="empty"><h3>The first memory is still ahead.</h3><p>No public mentions have been found by the connected sources yet. Sharing a card does not guarantee a post will be indexed.</p></div>'}</div>`;
+  $('check-mentions').onclick=async()=>{const b=$('check-mentions');b.disabled=true;b.textContent='Checking…';try{const result=await api('campaign/check',{method:'POST'});if(resource==='campaign')renderCampaign(result.data);}catch(e){toast(e.message);b.disabled=false;b.textContent='Check public mentions';}};
+  $('save-mention').onsubmit=async event=>{event.preventDefault();try{await api('campaign/mentions',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(event.target)))});await load();toast('Public link saved');}catch(e){toast(e.message);}};
+  $('content').querySelectorAll('[data-hide-mention]').forEach(button=>button.onclick=async()=>{try{await api('campaign/mentions/'+button.dataset.hideMention,{method:'DELETE'});await load();}catch(e){toast(e.message);}});
+}
 function renderItems() {
   const term = $("filter").value.toLowerCase();
   const rows = items.filter((i) =>
@@ -368,7 +391,7 @@ function renderItems() {
             )}</strong><br><small>${esc(
               i._id
             )}</small></td><td><span class="badge">${esc(
-              i.publicationStatus ||
+              (resource==='cities' && i.catalogReady===false && i.publicationStatus==='published' ? 'Importing places' : i.publicationStatus) ||
                 i.eventStatus ||
                 (i.enabled === false
                   ? "disabled"
@@ -439,7 +462,15 @@ function renderItems() {
         })
     );
 }
-function openEditor(item) {
+async function openEditor(item) {
+  const editorResource=resource;
+  let cityChoices=[];
+  if(['feeds','activities','events','collections'].includes(resource)) {
+    let next=1,more=true;
+    try { while(more && next<=10){const result=await api('cities?page='+next++);cityChoices.push(...result.data);more=result.meta.hasMore;} }
+    catch(e){toast(e.message);return;}
+    if(resource!==editorResource)return;
+  }
   editing = item?._id || null;
   const data = JSON.parse(JSON.stringify(item || templates[resource]));
   for (const key of [
@@ -474,7 +505,13 @@ function openEditor(item) {
       key.replace(/([A-Z])/g, " $1") +
       (optionalKeys.includes(key) ? " (optional)" : "");
     let input;
-    if (enums[key]) {
+    if(key==='cityId' && cityChoices.length) {
+      input=document.createElement('select');input.add(new Option('Choose a destination',''));
+      cityChoices.sort((a,b)=>a.name.localeCompare(b.name)).forEach(city=>input.add(new Option(`${city.name}, ${city.state}`,city._id)));
+      input.value=value || '';input.required=true;
+    } else if(key==='kind' && resource!=='categories') {
+      input=document.createElement('select');['place','hotel'].forEach(v=>input.add(new Option(v,v)));input.value=value;
+    } else if (enums[key]) {
       input = document.createElement("select");
       enums[key].forEach((v) => input.add(new Option(v, v)));
       input.value = value;

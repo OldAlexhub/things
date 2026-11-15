@@ -81,7 +81,7 @@ Only the free OpenStreetMap adapter is registered. Its ODbL permissions and attr
 
 - **OpenStreetMap / Overpass:** no API key. ODbL data, contributor attribution and database share-alike obligations. Default weekly interval, 14-day freshness retention. Fixed official Overpass endpoint, bounded queries, User-Agent, timeout and retry. No arbitrary OSM image URLs are copied without license review. [License](https://www.openstreetmap.org/copyright), [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API).
 - **Maps:** bundled Leaflet, configurable HTTPS tile URL, visible OSM attribution, identified WebView user agent, standard HTTP caching, no prefetch or offline downloads. [Tile policy](https://operations.osmfoundation.org/policies/tiles/). Respect the public tile usage limits; the current app does not configure a paid tile service.
-- Events are created and maintained through Content Studio using legitimate editorial sources. No third-party event API is integrated.
+- **Events:** free public iCalendar subscriptions, managed under Event calendars in Content Studio. Orlando starts with UCF. Add a city, name, HTTPS ICS URL and organizer page, then confirm permission and enable. Dates/locations/titles link back to the organizer; prices are not inferred. Six-hour refresh, 48-hour retention. Coverage depends on connected calendars; no Ticketmaster or paid API.
 - Weather, routing, automated price/hour verification and additional providers are not enabled. Their data must not be inferred from unavailable services.
 
 Manual sync remains available from Data sources. `SYNC_ENABLED=true` provisions recurring jobs by default. Set source `intervalMinutes` and `retentionHours` through the studio. Keep retention compatible with the provider agreement. Providers returning an empty successful response retain existing records until their ordinary expiry.
@@ -95,3 +95,11 @@ Uploads require authentication, CSRF, image decoding, size/pixel limits and attr
 No hosted server, production MongoDB, Google consent configuration or Play listing is provisioned by merely running this code. See the mobile README for release prerequisites and test limitations.
 
 The production hostname resolved during verification but rejected the TLS handshake. Configure a valid certificate and route HTTPS traffic to this server, then verify `/api/v1/health` returns status `ok`. Remote hosting credentials were not provided, so the host itself was not modified.
+
+## City coverage, hotels and public memories
+
+The one-time US expansion enables the largest city in each of the 50 states, based on [Census Vintage 2025](https://www.census.gov/data/tables/time-series/demo/popest/2020s-total-cities-and-towns.html), plus Orlando. Honolulu uses the Census Urban Honolulu CDP. Imports run sequentially; new destinations appear publicly only after the first successful place import. Existing editorial publish/unpublish decisions survive restarts. City centers and bounds are cached OpenStreetMap/Nominatim results, with no startup geocoding. Respect [Nominatim policy](https://operations.osmfoundation.org/policies/nominatim/): at most one request per second, identified requests, caching, and no autocomplete. Overpass coverage is limited to the city bounds within 50 km of its center.
+
+Hotels are separate from day-planning activities. `/api/v1/hotels?cityId=...` returns properties with honest rate-availability links; it does not claim live room prices or booking inventory.
+
+**Hashtag & memories** in Content Studio checks recent public `#old_alex_hub` results hourly on Bluesky and mastodon.social. It shows last checks, API failures, observed mentions and public post links. Other social networks have manual search links and a saved-link form. This is partial public coverage, not universal tracking, impressions or revenue attribution. No private account access is used. Records expire 30 days after last observation; hide controls remove them from the dashboard. `EVENTS_ENABLED=true` and `HASHTAG_TRACKING_ENABLED=true` are defaults even when absent from an existing environment.

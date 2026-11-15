@@ -19,6 +19,7 @@ import {
   Activity,
   Collection,
   MediaAsset,
+  Mention,
 } from "../models/index.js";
 import {
   requireAdmin,
@@ -28,6 +29,7 @@ import {
 } from "../lib/auth.js";
 import { id, validateRecord, schemas } from "../lib/validation.js";
 import { triggerSync } from "../services/sync.js";
+import {checkMentions,mentionDashboard} from '../services/mentions.js';
 export const adminRouter = Router();
 const loginLimit = rateLimit({
   windowMs: 15 * 60000,
@@ -88,6 +90,21 @@ adminRouter.get("/overview", async (_req, res) => {
     },
   });
 });
+adminRouter.get('/campaign',async(_req,res)=>res.json({data:await mentionDashboard()}));
+adminRouter.post('/campaign/check',adminOnly,async(_req,res)=>{
+  await checkMentions({force:true});res.json({data:await mentionDashboard()});
+});
+adminRouter.post('/campaign/mentions',adminOnly,async(req,res)=>{
+  const data=z.object({url:z.string().url().max(2000).refine(v=>v.startsWith('https://')),author:z.string().trim().max(160).default(''),excerpt:z.string().trim().max(300).default('')}).strict().parse(req.body);
+  const existing=await Mention.findOne({url:data.url});
+  if(existing) {existing.hidden=false;await existing.save();return res.json({data:existing});}
+  const item=await Mention.create({...data,source:'Saved link',lastSeenAt:new Date(),expireAt:new Date(Date.now()+30*86400000)});
+  await audit(req,'save-public-link','campaign',String(item._id));res.status(201).json({data:item});
+});
+adminRouter.delete('/campaign/mentions/:id',adminOnly,async(req,res)=>{
+  id.parse(req.params.id);await Mention.updateOne({_id:req.params.id},{$set:{hidden:true}});
+  await audit(req,'hide-mention','campaign',req.params.id);res.json({data:{ok:true}});
+});
 // Explicit city search only: no keystroke/autocomplete requests to Nominatim.
 const cityLookupLimit = rateLimit({windowMs:1100,limit:1,standardHeaders:'draft-8',legacyHeaders:false});
 adminRouter.get('/city-lookup',cityLookupLimit,async(req,res)=>{
@@ -109,7 +126,7 @@ async function audit(req, action, resource, resourceId, fields = []) {
 }
 adminRouter.post("/sync", adminOnly, async (req, res) => {
   const { source, cityId } = z
-    .object({ source: z.literal("osm"), cityId: id })
+    .object({ source: z.enum(['osm','calendars']), cityId: id })
     .parse(req.body);
   await triggerSync(source, cityId);
   await audit(req, "sync", source, cityId);
@@ -205,7 +222,7 @@ async function validateRefs(kind, data) {
 adminRouter.param("resource", (req, res, next, value) => {
   if (!resources[value])
     return res.status(404).json({ error: { message: "Unknown resource" } });
-  if (["sources", "versions"].includes(value) && req.admin.role !== "admin")
+  if (["sources", "versions", "feeds"].includes(value) && req.admin.role !== "admin")
     return res
       .status(403)
       .json({ error: { message: "Administrator access required" } });
@@ -245,6 +262,7 @@ adminRouter.post("/:resource", async (req, res) => {
     data.publishedAt = new Date();
   const item = await req.resourceModel.create(data);
   if(req.params.resource === 'cities' && data.publicationStatus === 'published') await triggerSync('osm',String(item._id)).catch(()=>{});
+  if(req.params.resource === 'feeds' && data.enabled && data.permissionReviewed) await triggerSync('calendars',data.cityId).catch(()=>{});
   await audit(
     req,
     "create",
@@ -280,6 +298,7 @@ adminRouter.put("/:resource/:id", async (req, res) => {
   );
   if (!item)
     throw Object.assign(new Error("Record not found"), { status: 404 });
+  if(req.params.resource === 'feeds' && data.enabled && data.permissionReviewed) await triggerSync('calendars',data.cityId).catch(()=>{});
   await audit(
     req,
     "update",
@@ -301,6 +320,8 @@ adminRouter.delete("/:resource/:id", adminOnly, async (req, res) => {
   } else if (resource === "categories") {
     item.active = false;
     await item.save();
+  } else if(resource === 'feeds') {
+    item.enabled=false; await item.save();
   } else if (resource === "media") {
     const query = {
       $or: [

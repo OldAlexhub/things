@@ -1,4 +1,5 @@
 import {linkedPhotos, qualityScore} from "./photography.js";
+import {calendarProvider} from './calendars.js';
 const UA = "ThingsToDo/1.0 (Old Alex Hub; info@oldalexhub.com)";
 export async function fetchJSON(url, options = {}) {
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -103,6 +104,7 @@ export function normalizeOSM(element, city, categories) {
   };
 }
 export const providers = {
+  calendars: calendarProvider,
   osm: {
     model: "Activity",
     configured: () => (process.env.OSM_ENABLED ?? "true") === "true",

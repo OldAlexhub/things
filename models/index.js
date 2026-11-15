@@ -192,6 +192,7 @@ export const Event = model(
   {
     ...activity,
     venue: String,
+    allDay: Boolean,
     startAt: { type: Date, required: true },
     endAt: Date,
     timezone: String,
@@ -237,6 +238,17 @@ export const ContentSource = model("ContentSource", {
   retentionHours: { type: Number, default: 24 },
   intervalMinutes: { type: Number, default: 360 },
   lastSuccessfulSync: Date,
+});
+export const EventFeed=model('EventFeed',{
+  cityId:ref('City',true),name:{type:String,required:true},url:{type:String,required:true},sourceUrl:String,
+  enabled:{type:Boolean,default:true},permissionReviewed:{type:Boolean,default:false},
+},[[{cityId:1,url:1},{unique:true}]]);
+export const Mention=model('Mention',{
+  url:{type:String,unique:true},source:String,author:String,excerpt:String,postedAt:Date,
+  likes:Number,reposts:Number,lastSeenAt:Date,hidden:{type:Boolean,default:false},expireAt:Date,
+},[[{expireAt:1},{expireAfterSeconds:0}]]);
+export const MentionCheck=model('MentionCheck',{
+  source:{type:String,unique:true},checkedAt:Date,lastSuccessAt:Date,status:String,message:String,found:Number,
 });
 export const SyncJob = model("SyncJob", {
   key: { type: String, unique: true },
@@ -316,5 +328,6 @@ export const resources = {
   collections: Collection,
   media: MediaAsset,
   sources: ContentSource,
+  feeds: EventFeed,
   versions: AppVersion,
 };
