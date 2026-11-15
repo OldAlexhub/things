@@ -8,6 +8,11 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { ensureAdministrator } from "../services/bootstrap.js";
 import { AdminUser } from "../models/index.js";
 import { verifyPassword } from "../lib/auth.js";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
+const execFileAsync = promisify(execFile);
+const serverEntry = fileURLToPath(new URL("../server.js", import.meta.url));
 let mongo, directory;
 before(async () => {
   process.env.NODE_ENV = "test";
@@ -43,4 +48,59 @@ test("automatic administrator creation can be explicitly disabled", async () => 
   process.env.AUTO_CREATE_ADMIN = "false";
   assert.equal((await ensureAdministrator(directory)).created, false);
   assert.equal(await AdminUser.countDocuments(), 0);
+});
+
+test("first startup accepts the configured ten-character password without replacing it", async () => {
+  process.env.ADMIN_PASSWORD = "custompass";
+  const first = await ensureAdministrator(directory);
+  assert.equal(first.created, true);
+  assert.equal(first.credentialsFile, undefined);
+  const user = await AdminUser.findOne({}).select("+passwordHash");
+  assert.ok(await verifyPassword(process.env.ADMIN_PASSWORD, user.passwordHash));
+  assert.equal((await ensureAdministrator(directory)).created, false);
+});
+
+test("invalid bootstrap password exits promptly with an actionable error and no secret", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [serverEntry], {
+      cwd: directory,
+      timeout: 10000,
+      env: {
+        ...process.env,
+        MONGODB_URI: mongo.getUri(),
+        ADMIN_PASSWORD: "tiny!",
+        AUTO_CREATE_ADMIN: "true",
+        AUTO_SEED: "false",
+      },
+    }),
+    (error) => {
+      assert.equal(error.code, 1);
+      assert.equal(error.killed, false);
+      assert.match(error.stderr, /ADMIN_PASSWORD must have at least 8 characters/);
+      assert.match(error.stderr, /"stage":"bootstrap"/);
+      assert.ok(!error.stderr.includes("tiny!"));
+      return true;
+    }
+  );
+  assert.equal(await AdminUser.countDocuments(), 0);
+});
+
+test("database startup errors do not expose connection credentials", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [serverEntry], {
+      cwd: directory,
+      timeout: 10000,
+      env: {
+        ...process.env,
+        MONGODB_URI: "mongodb://sample:private-sentinel@%invalid/database",
+      },
+    }),
+    (error) => {
+      assert.equal(error.code, 1);
+      assert.equal(error.killed, false);
+      assert.match(error.stderr, /"stage":"database"/);
+      assert.ok(!error.stderr.includes("private-sentinel"));
+      return true;
+    }
+  );
 });

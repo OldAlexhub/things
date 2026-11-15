@@ -31,7 +31,7 @@ These switches default to `true` in the actual environment file and both example
 - `OSM_ENABLED`: free OpenStreetMap imports.
 - `SYNC_ENABLED`: automatic recurring synchronization for published cities.
 - `AUTO_SEED`: idempotent initial city, taxonomy and provider setup. Existing city publication choices and editorial content are preserved.
-- `AUTO_CREATE_ADMIN`: secure first-run administrator creation. If no admin exists and `ADMIN_PASSWORD` is blank, a unique strong password is stored privately in `.secrets/initial-admin.json`. Retrieve it on the host to sign in, and keep that directory private. Existing administrators are never reset. You can instead supply `ADMIN_PASSWORD` privately.
+- `AUTO_CREATE_ADMIN`: secure first-run administrator creation. If no admin exists and `ADMIN_PASSWORD` is blank, a unique strong password is stored privately in `.secrets/initial-admin.json`. Retrieve it on the host to sign in, and keep that directory private. Existing administrators are never reset. You can instead supply `ADMIN_PASSWORD` privately (at least 8 characters); the supplied password is used as entered.
 
 Startup seeds automatically; a separate seed command and source enablement steps are not needed. Only Orlando is initially published. Add future cities in Content Studio and set `publicationStatus` to `published`. Within the next scheduler tick (at most about one minute while idle), the server creates its import job. The app discovers the city on refresh without an app rebuild. Draft, unpublished and archived cities stay hidden and are not imported. Existing source configuration can still be disabled in the dashboard when needed.
 

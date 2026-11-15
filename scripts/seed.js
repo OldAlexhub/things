@@ -187,8 +187,8 @@ export async function seed() {
   const password = process.env.ADMIN_PASSWORD,
     email = (process.env.ADMIN_EMAIL || "info@oldalexhub.com").toLowerCase();
   if (password) {
-    if (password.length < 14)
-      throw new Error("ADMIN_PASSWORD must have at least 14 characters");
+    if (password.length < 8)
+      throw new Error("ADMIN_PASSWORD must have at least 8 characters");
     if (!(await AdminUser.exists({ email })))
       await AdminUser.create({
         email,

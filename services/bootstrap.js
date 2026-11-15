@@ -39,8 +39,8 @@ export async function ensureAdministrator(directory = ".secrets") {
       throw new Error("Private bootstrap credentials do not match ADMIN_EMAIL");
     password = saved.password;
   }
-  if (password.length < 14)
-    throw new Error("ADMIN_PASSWORD must have at least 14 characters");
+  if (password.length < 8)
+    throw new Error("ADMIN_PASSWORD must have at least 8 characters");
   try {
     await AdminUser.create({
       email,
