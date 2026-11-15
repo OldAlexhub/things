@@ -9,6 +9,10 @@ import { createApp } from "../app.js";
 import { startScheduler } from "../services/sync.js";
 import { ContentSource } from "../models/index.js";
 import { triggerSync } from "../services/sync.js";
+// This explicit development launcher stays local even with a production .env.
+process.env.NODE_ENV = "development";
+process.env.PUBLIC_URL = `http://localhost:${process.env.PORT || 3000}`;
+process.env.CORS_ORIGINS = process.env.PUBLIC_URL;
 await mkdir(".local/db", { recursive: true });
 if (!process.env.ADMIN_PASSWORD) {
   try {

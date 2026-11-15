@@ -163,6 +163,34 @@ export async function runSyncJob(job, providerOverride) {
   }
   return log;
 }
+export async function queuePublishedCitySyncs() {
+  if ((process.env.SYNC_ENABLED ?? "true") !== "true") return;
+  const [sources, cities] = await Promise.all([
+    ContentSource.find({
+      name: { $in: Object.keys(providers) },
+      enabled: true,
+      permissionReviewed: true,
+    }).lean(),
+    City.find({ publicationStatus: "published" }).select("_id").lean(),
+  ]);
+  for (const source of sources) {
+    if (!providers[source.name].configured()) continue;
+    for (const city of cities)
+      await SyncJob.updateOne(
+        { key: `${source.name}:${city._id}` },
+        {
+          $setOnInsert: {
+            source: source.name,
+            cityId: city._id,
+            nextRunAt: new Date(),
+            lockedUntil: new Date(0),
+          },
+        },
+        { upsert: true }
+      );
+  }
+}
+
 export function startScheduler() {
   let running = false,
     stopped = false;
@@ -181,30 +209,9 @@ export function startScheduler() {
           expiresAt: { $lte: new Date() },
         }),
       ]);
-      if (process.env.SYNC_ENABLED === "true") {
-        const [sources, cities] = await Promise.all([
-          ContentSource.find({
-            enabled: true,
-            permissionReviewed: true,
-          }).lean(),
-          City.find({ publicationStatus: "published" }).select("_id").lean(),
-        ]);
-        for (const source of sources)
-          for (const city of cities)
-            await SyncJob.updateOne(
-              { key: `${source.name}:${city._id}` },
-              {
-                $setOnInsert: {
-                  source: source.name,
-                  cityId: city._id,
-                  nextRunAt: new Date(),
-                  lockedUntil: new Date(0),
-                },
-              },
-              { upsert: true }
-            );
-      }
+      await queuePublishedCitySyncs();
       const jobs = await SyncJob.find({
+        source: { $in: Object.keys(providers) },
         nextRunAt: { $lte: new Date() },
         lockedUntil: { $lte: new Date() },
       })

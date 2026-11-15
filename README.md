@@ -12,24 +12,28 @@ npm run dev:local
 
 Open `http://localhost:3000` for Content Studio. The development launcher downloads and runs a real local MongoDB binary and retains its database in `.local/db`. Its automatically generated local administrator credentials are in `.local/admin-login.json`, which is excluded from source control. This launcher is for development only. It does not substitute an in-memory catalog or fake API responses.
 
-For a one-time import of real OpenStreetMap places into the local database:
+OpenStreetMap and scheduled synchronization are enabled by default. The first run seeds Orlando and its categories; the scheduler queues imports for published cities. No provider API keys or billing accounts are required. `--import-osm` remains available to request an immediate refresh. Overpass failures preserve existing content and retry later. The local launcher uses development cookies and localhost URLs even when `.env` contains production settings.
+
+## Deploy with the defaults
 
 ```powershell
-npm run dev:local -- --import-osm
+npm ci --omit=dev
+# Use .env.production.example as .env on a new host.
+npm start
 ```
 
-This explicit option enables the OSM source for the local database, records the reviewed ODbL permission and queues an import. Imported venue details remain **unverified**. Unknown hours and admission prices remain unknown. Overpass may be unavailable or rate limited; failed syncs preserve the existing dataset. Do not run two local launchers against the same `.local/db` directory.
+The supplied production configuration uses `https://things.server.oldalexhub.com`. MongoDB defaults to `mongodb://127.0.0.1:27017/thingstodo`; change only `MONGODB_URI` if the host uses another database. Run MongoDB privately with persistent storage and backups. Route the HTTPS hostname to the server's port 3000, provide a valid certificate, and persist the `uploads` directory. `TRUST_PROXY` must match the actual reverse-proxy deployment.
 
-## Persistent deployment
+These switches default to `true` in the actual environment file and both examples:
 
-1. Install production dependencies using `npm ci --omit=dev`.
-2. For the selected production host `https://things.server.oldalexhub.com`, use `.env.production.example` as the starting configuration. For development, use `.env.example`. Configure `MONGODB_URI`, `PUBLIC_URL` and `CORS_ORIGINS`. Keep the database private and authenticated. Use a managed or independently operated MongoDB deployment with backups.
-3. Set a unique bootstrap `ADMIN_PASSWORD` with at least 14 characters and `ADMIN_EMAIL=info@oldalexhub.com`; run `npm run seed`. Remove the bootstrap password afterward. Existing accounts and content are preserved by seeding.
-4. Run `npm start` behind HTTPS. Set `TRUST_PROXY` to the actual trusted proxy hop count, not an arbitrary permissive value. Serve the API, studio, `/map.html`, `/vendor` and uploaded media from the same public origin.
-5. Mount durable storage at `UPLOAD_DIR`. Back up it and MongoDB. Horizontal deployments need a shared media backend before scaling; the current storage adapter uses local disk.
-6. Set the release app's `TTD_API_URL` to this HTTPS origin. No API credentials belong in the Android app.
+- `OSM_ENABLED`: free OpenStreetMap imports.
+- `SYNC_ENABLED`: automatic recurring synchronization for published cities.
+- `AUTO_SEED`: idempotent initial city, taxonomy and provider setup. Existing city publication choices and editorial content are preserved.
+- `AUTO_CREATE_ADMIN`: secure first-run administrator creation. If no admin exists and `ADMIN_PASSWORD` is blank, a unique strong password is stored privately in `.secrets/initial-admin.json`. Retrieve it on the host to sign in, and keep that directory private. Existing administrators are never reset. You can instead supply `ADMIN_PASSWORD` privately.
 
-Production startup fails clearly if MongoDB is absent. Health is `GET /api/v1/health`. SIGTERM stops new scheduler work and closes HTTP connections. Database connection errors are sanitized. Secrets and request bodies are not logged. Review the reverse proxy's own logging and retention.
+Startup seeds automatically; a separate seed command and source enablement steps are not needed. Only Orlando is initially published. Add future cities in Content Studio and set `publicationStatus` to `published`. Within the next scheduler tick (at most about one minute while idle), the server creates its import job. The app discovers the city on refresh without an app rebuild. Draft, unpublished and archived cities stay hidden and are not imported. Existing source configuration can still be disabled in the dashboard when needed.
+
+The API and media, `/map.html`, `/vendor`, privacy policy and Content Studio share the same public origin. `GET /api/v1/health` verifies database connectivity. SIGTERM stops the scheduler and closes HTTP connections. Secrets and request bodies are not logged. This single-server storage implementation requires shared media storage before horizontal scaling.
 
 ## Content Studio and adding a city
 
@@ -71,14 +75,14 @@ Planning uses at most 400 geographically bounded candidates. It enforces require
 
 `ContentSource`, `SyncJob`, and `SyncLog` retain configuration, leases and outcomes. Each source/city job acquires an atomic 10-minute lease, retries on later ticks with bounded backoff, records counts, and upserts by provider/external ID. An editor's archive/unpublish decision survives refresh. Empty/error responses never trigger a full dataset deletion. Retention cleanup is independent of imports; public filters hide expired records even before physical cleanup. Logs default to 30 days; audit history to 90 days.
 
-Providers start disabled. Enable only after checking the actual agreement, setting `permissionReviewed`, recording license and attribution, choosing retention and setting the relevant environment switches.
+Only the free OpenStreetMap adapter is registered. Its ODbL permissions and attribution have been reviewed, and new databases enable it automatically. Existing admin choices are preserved. Unsupported provider configurations and jobs are removed by the idempotent seed. New integrations must remain free and undergo license/usage review before being added.
 
 - **OpenStreetMap / Overpass:** no API key. ODbL data, contributor attribution and database share-alike obligations. Default weekly interval, 14-day freshness retention. Fixed official Overpass endpoint, bounded queries, User-Agent, timeout and retry. No arbitrary OSM image URLs are copied without license review. [License](https://www.openstreetmap.org/copyright), [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API).
-- **Ticketmaster Discovery v2:** requires `TICKETMASTER_API_KEY`, environment and admin enablement, and agreement review. Default 6-hour interval and conservative 24-hour cache retention, not a representation that every contract permits this. Requests stay below documented default rate/deep-pagination limits. Cancellation and rescheduling status is preserved. Missing explicit event time is skipped; prices remain unknown because advertised ranges do not establish group totals including fees. [API](https://developer.ticketmaster.com/products-and-docs/apis/discovery-api/v2/), [terms](https://developer.ticketmaster.com/support/terms-of-use/).
-- **Maps:** bundled Leaflet, configurable HTTPS tile URL, visible OSM attribution, identified WebView user agent, standard HTTP caching, no prefetch or offline downloads. [Tile policy](https://operations.osmfoundation.org/policies/tiles/). Switch to a suitable commercial tile service if traffic requires it.
+- **Maps:** bundled Leaflet, configurable HTTPS tile URL, visible OSM attribution, identified WebView user agent, standard HTTP caching, no prefetch or offline downloads. [Tile policy](https://operations.osmfoundation.org/policies/tiles/). Respect the public tile usage limits; the current app does not configure a paid tile service.
+- Events are created and maintained through Content Studio using legitimate editorial sources. No third-party event API is integrated.
 - Weather, routing, automated price/hour verification and additional providers are not enabled. Their data must not be inferred from unavailable services.
 
-Manual sync runs from Data sources even with automatic scheduling disabled. `SYNC_ENABLED=true` provisions recurring jobs. Set source `intervalMinutes` and `retentionHours` through the studio. Keep retention compatible with the provider agreement. Providers returning an empty successful response retain existing records until their ordinary expiry.
+Manual sync remains available from Data sources. `SYNC_ENABLED=true` provisions recurring jobs by default. Set source `intervalMinutes` and `retentionHours` through the studio. Keep retention compatible with the provider agreement. Providers returning an empty successful response retain existing records until their ordinary expiry.
 
 ## Media, privacy and checks
 
@@ -86,6 +90,6 @@ Uploads require authentication, CSRF, image decoding, size/pixel limits and attr
 
 `npm test` runs real ephemeral MongoDB integration tests and planner edge cases. `npm audit --omit=dev` checks server runtime dependencies. `node scripts/documents.js` synchronizes the in-app policy into hosted HTML and Markdown and refreshes store text. The policy is available at `/privacy.html` and terms at `/terms.html`; publish them at the actual HTTPS origin before store submission.
 
-No hosted server, production MongoDB, Ticketmaster account, Google consent configuration or Play listing is provisioned by merely running this code. See the mobile README for release prerequisites and test limitations.
+No hosted server, production MongoDB, Google consent configuration or Play listing is provisioned by merely running this code. See the mobile README for release prerequisites and test limitations.
 
 The production hostname resolved during verification but rejected the TLS handshake. Configure a valid certificate and route HTTPS traffic to this server, then verify `/api/v1/health` returns status `ok`. Remote hosting credentials were not provided, so the host itself was not modified.

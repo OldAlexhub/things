@@ -99,7 +99,7 @@ async function audit(req, action, resource, resourceId, fields = []) {
 }
 adminRouter.post("/sync", adminOnly, async (req, res) => {
   const { source, cityId } = z
-    .object({ source: z.enum(["osm", "ticketmaster"]), cityId: id })
+    .object({ source: z.literal("osm"), cityId: id })
     .parse(req.body);
   await triggerSync(source, cityId);
   await audit(req, "sync", source, cityId);

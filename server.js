@@ -2,8 +2,10 @@ import "dotenv/config";
 import { connectDatabase } from "./db/connect.js";
 import { createApp } from "./app.js";
 import { startScheduler } from "./services/sync.js";
+import { initializeServer } from "./services/bootstrap.js";
 try {
   await connectDatabase();
+  await initializeServer();
   const server = createApp().listen(
     Number(process.env.PORT || 3000),
     "0.0.0.0",

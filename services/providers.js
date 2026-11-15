@@ -98,76 +98,10 @@ export function normalizeOSM(element, city, categories) {
     environment: category === "outdoors-nature" ? "outdoor" : "unknown",
   };
 }
-export function normalizeTicketmaster(event, city, categories) {
-  if (!event.id || !event.name || !event.dates?.start?.dateTime) return null;
-  const venue = event._embedded?.venues?.[0],
-    lat = Number(venue?.location?.latitude),
-    lon = Number(venue?.location?.longitude);
-  const status = event.dates?.status?.code;
-  return {
-    cityId: city._id,
-    title: event.name,
-    slug: slug(event.name, event.id),
-    description:
-      event.info ||
-      event.pleaseNote ||
-      "See Ticketmaster for current event and ticket details.",
-    shortDescription: (event.info || event.name).slice(0, 300),
-    categories: categories["events-festivals"]
-      ? [categories["events-festivals"]]
-      : [],
-    tags: ["events"],
-    audience: [],
-    location: {
-      address: [venue?.address?.line1, venue?.city?.name]
-        .filter(Boolean)
-        .join(", "),
-    },
-    ...(Number.isFinite(lat) && Number.isFinite(lon)
-      ? { coordinates: { type: "Point", coordinates: [lon, lat] } }
-      : {}),
-    images: (event.images || [])
-      .filter((i) => safeUrl(i.url) && i.width >= 600)
-      .slice(0, 3)
-      .map((i) => ({
-        url: i.url,
-        alt: event.name,
-        credit: "Ticketmaster / event provider",
-        license: "Provider permission required",
-        sourceUrl: event.url,
-      })),
-    priceInformation: {
-      known: false,
-      currency: "USD",
-      note: "Ticket prices and fees vary. Check the ticket provider.",
-    },
-    bookingUrl: safeUrl(event.url),
-    source: "ticketmaster",
-    sourceUrl: safeUrl(event.url),
-    externalId: event.id,
-    verificationStatus: "unverified",
-    publicationStatus: "published",
-    venue: venue?.name,
-    startAt: new Date(event.dates.start.dateTime),
-    ...(event.dates?.end?.dateTime
-      ? { endAt: new Date(event.dates.end.dateTime) }
-      : {}),
-    timezone: event.dates?.timezone || city.timezone,
-    eventStatus:
-      status === "cancelled"
-        ? "cancelled"
-        : status === "postponed"
-        ? "postponed"
-        : status === "rescheduled"
-        ? "rescheduled"
-        : "scheduled",
-    ticketInformation: event.pleaseNote,
-  };
-}
 export const providers = {
   osm: {
     model: "Activity",
-    configured: () => process.env.OSM_ENABLED === "true",
+    configured: () => (process.env.OSM_ENABLED ?? "true") === "true",
     async fetch(city, categories) {
       const [south, west, north, east] = city.geographicBounds || [
         city.latitude - 0.18,
@@ -189,38 +123,6 @@ export const providers = {
         throw new Error("Incomplete OpenStreetMap response");
       return data.elements
         .map((e) => normalizeOSM(e, city, categories))
-        .filter(Boolean);
-    },
-  },
-  ticketmaster: {
-    model: "Event",
-    configured: () =>
-      process.env.TICKETMASTER_ENABLED === "true" &&
-      !!process.env.TICKETMASTER_API_KEY,
-    async fetch(city, categories) {
-      const records = [];
-      let pages = 1;
-      for (let page = 0; page < Math.min(pages, 5); page++) {
-        const url = new URL(
-          "https://app.ticketmaster.com/discovery/v2/events.json"
-        );
-        url.search = new URLSearchParams({
-          apikey: process.env.TICKETMASTER_API_KEY,
-          latlong: `${city.latitude},${city.longitude}`,
-          radius: "40",
-          unit: "km",
-          size: "200",
-          page: String(page),
-          sort: "date,asc",
-        }).toString();
-        const data = await fetchJSON(url);
-        pages = data.page?.totalPages || 1;
-        records.push(...(data._embedded?.events || []));
-        if (page + 1 < Math.min(pages, 5))
-          await new Promise((r) => setTimeout(r, 250));
-      }
-      return records
-        .map((e) => normalizeTicketmaster(e, city, categories))
         .filter(Boolean);
     },
   },

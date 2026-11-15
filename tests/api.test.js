@@ -16,8 +16,8 @@ import {
   AdminUser,
   AppVersion,
 } from "../models/index.js";
-import { runSyncJob } from "../services/sync.js";
-import { normalizeOSM, normalizeTicketmaster } from "../services/providers.js";
+import { runSyncJob, queuePublishedCitySyncs } from "../services/sync.js";
+import { normalizeOSM, providers } from "../services/providers.js";
 process.env.NODE_ENV = "test";
 process.env.ADMIN_PASSWORD = "test-only-password-never-production";
 let mongo, app, city, category, free, agent, csrf;
@@ -48,12 +48,10 @@ before(async () => {
   });
   app = createApp();
   agent = request.agent(app);
-  const login = await agent
-    .post("/api/v1/admin/login")
-    .send({
-      email: "info@oldalexhub.com",
-      password: process.env.ADMIN_PASSWORD,
-    });
+  const login = await agent.post("/api/v1/admin/login").send({
+    email: "info@oldalexhub.com",
+    password: process.env.ADMIN_PASSWORD,
+  });
   assert.equal(login.status, 200);
   csrf = login.body.data.csrf;
 });
@@ -257,7 +255,7 @@ test("active lease prevents overlapping jobs", async () => {
   });
   assert.equal(await runSyncJob(job), false);
 });
-test("provider normalization never invents price, hours or event time", () => {
+test("provider normalization never invents price or hours", () => {
   const a = normalizeOSM(
     {
       id: 42,
@@ -271,10 +269,7 @@ test("provider normalization never invents price, hours or event time", () => {
   );
   assert.equal(a.priceInformation.known, false);
   assert.equal(a.operatingHours, undefined);
-  assert.equal(
-    normalizeTicketmaster({ id: "x", name: "No time", dates: {} }, city, {}),
-    null
-  );
+  assert.deepEqual(Object.keys(providers), ["osm"]);
 });
 
 test("editor can clear optional fields and cannot reference a missing city", async () => {
@@ -324,5 +319,67 @@ test("verified hours must match the planning city timezone", async () => {
         validUntil: "2027-01-01T00:00:00Z",
       },
     });
+  assert.equal(r.status, 400);
+});
+
+test("publishing a city on the server enables discovery and queues its free provider sync", async () => {
+  process.env.OSM_ENABLED = "true";
+  process.env.SYNC_ENABLED = "true";
+  const destination = await City.create({
+    name: "Publication test city",
+    slug: "publication-test-city",
+    state: "FL",
+    country: "USA",
+    timezone: "America/New_York",
+    latitude: 28,
+    longitude: -81,
+    description: "Isolated test fixture",
+    publicationStatus: "draft",
+  });
+  await queuePublishedCitySyncs();
+  assert.equal(await SyncJob.exists({ key: `osm:${destination._id}` }), null);
+  const fields = {
+    name: destination.name,
+    slug: destination.slug,
+    state: destination.state,
+    country: destination.country,
+    timezone: destination.timezone,
+    latitude: destination.latitude,
+    longitude: destination.longitude,
+    description: destination.description,
+    publicationStatus: "published",
+  };
+  const published = await agent
+    .put(`/api/v1/admin/cities/${destination._id}`)
+    .set("X-CSRF-Token", csrf)
+    .send(fields);
+  assert.equal(published.status, 200);
+  await queuePublishedCitySyncs();
+  assert.ok(await SyncJob.exists({ key: `osm:${destination._id}` }));
+  assert.ok(
+    (await request(app).get("/api/v1/cities")).body.data.some(
+      (c) => c._id === String(destination._id)
+    )
+  );
+  await queuePublishedCitySyncs();
+  assert.equal(
+    await SyncJob.countDocuments({ key: `osm:${destination._id}` }),
+    1
+  );
+  fields.publicationStatus = "unpublished";
+  await agent
+    .put(`/api/v1/admin/cities/${destination._id}`)
+    .set("X-CSRF-Token", csrf)
+    .send(fields);
+  assert.equal(
+    (await request(app).get(`/api/v1/cities/${destination._id}`)).status,
+    404
+  );
+});
+test("only the free configured provider can be requested for synchronization", async () => {
+  const r = await agent
+    .post("/api/v1/admin/sync")
+    .set("X-CSRF-Token", csrf)
+    .send({ source: "unsupported-provider", cityId: String(city._id) });
   assert.equal(r.status, 400);
 });

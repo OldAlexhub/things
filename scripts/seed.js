@@ -8,9 +8,13 @@ import {
   AdminUser,
   ContentSource,
   AppVersion,
+  SyncJob,
 } from "../models/index.js";
 import { hashPassword } from "../lib/auth.js";
 export async function seed() {
+  // Remove obsolete provider configuration, without changing saved editorial content.
+  await ContentSource.deleteMany({ name: { $nin: ["osm"] } });
+  await SyncJob.deleteMany({ source: { $nin: ["osm"] } });
   const city = await City.findOneAndUpdate(
     { slug: "orlando" },
     {
@@ -29,7 +33,22 @@ export async function seed() {
         publishedAt: new Date(),
         theme: { accent: "#12B8A6", background: "#101827" },
         supportedFeatures: ["events", "planning", "maps", "nearby"],
-        planTemplates: [{key:'slow-morning',title:'A slower morning',description:'A relaxed four-hour plan, with known admission prices and a smaller travel radius.',defaults:{startTime:'09:00',endTime:'13:00',pace:'relaxed',meals:false,radiusKm:10,strictBudget:true}}],
+        planTemplates: [
+          {
+            key: "slow-morning",
+            title: "A slower morning",
+            description:
+              "A relaxed four-hour plan, with known admission prices and a smaller travel radius.",
+            defaults: {
+              startTime: "09:00",
+              endTime: "13:00",
+              pace: "relaxed",
+              meals: false,
+              radiusKm: 10,
+              strictBudget: true,
+            },
+          },
+        ],
         homeSections: [
           {
             key: "featured",
@@ -140,19 +159,15 @@ export async function seed() {
       intervalMinutes: 10080,
       retentionHours: 336,
     },
-    {
-      name: "ticketmaster",
-      license: "Review your Ticketmaster agreement before enabling",
-      attribution: "Ticketmaster",
-      termsUrl: "https://developer.ticketmaster.com/support/terms-of-use/",
-      intervalMinutes: 360,
-      retentionHours: 24,
-    },
   ])
     await ContentSource.updateOne(
       { name: source.name },
       {
-        $setOnInsert: { ...source, enabled: false, permissionReviewed: false },
+        $setOnInsert: {
+          ...source,
+          enabled: (process.env.OSM_ENABLED ?? "true") === "true",
+          permissionReviewed: true,
+        },
       },
       { upsert: true }
     );
