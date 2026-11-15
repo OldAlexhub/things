@@ -49,7 +49,7 @@ Sign in at `/`. Authentication uses scrypt password hashes and 8-hour MongoDB-ba
 
 Photo coverage depends on the open data available for each venue. A city import can take several minutes; its progress and errors are visible in Synchronization. Preserve the uploads directory across deployments. OpenStreetMap contributors supply place and city-search data; Wikimedia credits and license links travel with each photograph.
 
-The initial seed publishes Orlando and a 16-category taxonomy, but it never invents an activity catalog, events, prices or operating hours. Only Orlando is automatically published. City hero/gallery media is editable entirely on the server. The Orlando seed includes a redistributable CC BY 4.0 city photo, served from `/city/orlando-lake-eola.jpg`; credit and the original source travel with the API record. See `public/city/ATTRIBUTION.txt`.
+The initial seed publishes Orlando and a 16-category taxonomy, but it never invents an activity catalog, events, prices or operating hours. The US expansion described below queues 50 additional destinations. City hero/gallery media is editable entirely on the server. The Orlando seed includes a redistributable CC BY 4.0 city photo, served from `/city/orlando-lake-eola.jpg`; credit and the original source travel with the API record. See `public/city/ATTRIBUTION.txt`.
 
 On first startup, a versioned editorial migration adds five reviewed Orlando listings with sourced admission and venue photographs. It runs once and preserves later editorial changes. The source references, prices and review date are recorded in `scripts/orlando-reviewed.json`. General admission excludes separately charged parking, rentals and special events.
 
@@ -77,7 +77,7 @@ Planning uses at most 400 geographically bounded candidates. It enforces require
 
 `ContentSource`, `SyncJob`, and `SyncLog` retain configuration, leases and outcomes. Each source/city job acquires an atomic 10-minute lease, retries on later ticks with bounded backoff, records counts, and upserts by provider/external ID. An editor's archive/unpublish decision survives refresh. Empty/error responses never trigger a full dataset deletion. Retention cleanup is independent of imports; public filters hide expired records even before physical cleanup. Logs default to 30 days; audit history to 90 days.
 
-Only the free OpenStreetMap adapter is registered. Its ODbL permissions and attribution have been reviewed, and new databases enable it automatically. Existing admin choices are preserved. Unsupported provider configurations and jobs are removed by the idempotent seed. New integrations must remain free and undergo license/usage review before being added.
+The free OpenStreetMap and public iCalendar adapters are registered. Its ODbL permissions and attribution have been reviewed, and new databases enable it automatically. Existing admin choices are preserved. Unsupported provider configurations and jobs are removed by the idempotent seed. New integrations must remain free and undergo license/usage review before being added.
 
 - **OpenStreetMap / Overpass:** no API key. ODbL data, contributor attribution and database share-alike obligations. Default weekly interval, 14-day freshness retention. Fixed official Overpass endpoint, bounded queries, User-Agent, timeout and retry. No arbitrary OSM image URLs are copied without license review. [License](https://www.openstreetmap.org/copyright), [Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API).
 - **Maps:** bundled Leaflet, configurable HTTPS tile URL, visible OSM attribution, identified WebView user agent, standard HTTP caching, no prefetch or offline downloads. [Tile policy](https://operations.osmfoundation.org/policies/tiles/). Respect the public tile usage limits; the current app does not configure a paid tile service.
@@ -94,7 +94,7 @@ Uploads require authentication, CSRF, image decoding, size/pixel limits and attr
 
 No hosted server, production MongoDB, Google consent configuration or Play listing is provisioned by merely running this code. See the mobile README for release prerequisites and test limitations.
 
-The production hostname resolved during verification but rejected the TLS handshake. Configure a valid certificate and route HTTPS traffic to this server, then verify `/api/v1/health` returns status `ok`. Remote hosting credentials were not provided, so the host itself was not modified.
+The live Nexus deployment is available at https://things.server.oldalexhub.com. HTTPS health, city discovery, hotels and upcoming events were verified on November 15, 2026.
 
 ## City coverage, hotels and public memories
 
